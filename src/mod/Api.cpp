@@ -1,4 +1,4 @@
-#include "Api.h"
+#include "LLTranslatorApi.h"
 #include "MainManager.h"
 
 void setTranslationForCommandDescription(

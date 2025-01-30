@@ -14,6 +14,7 @@ end
 
 target("TranslatorApi") -- Change this to your mod name.
     add_rules("@levibuildscript/linkrule")
+    add_rules("@levibuildscript/modpacker")
 
     add_cxflags( "/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
     add_defines("NOMINMAX", "UNICODE", "_HAS_CXX23=1", "TRANSLATORAPI_EXPORT")
@@ -26,19 +27,13 @@ target("TranslatorApi") -- Change this to your mod name.
     add_includedirs("src")
     
     after_build(function (target)
-        local mod_packer = import("scripts.after_build")
+        local binDirectory = path.join(os.projectdir(), "bin")
+        local includeDirectory = path.join(binDirectory, "include")
+        local libDirectory = path.join(binDirectory, "lib")
 
-        local tag = os.iorun("git describe --tags --abbrev=0 --always")
-        local major, minor, patch, suffix = tag:match("v(%d+)%.(%d+)%.(%d+)(.*)")
-        if not major then
-            print("Failed to parse version tag, using 0.0.0")
-            major, minor, patch = 0, 0, 0
-        end
-        local mod_define = {
-            modName = target:name(),
-            modFile = path.filename(target:targetfile()),
-            modVersion = major .. "." .. minor .. "." .. patch,
-        }
-        
-        mod_packer.pack_mod(target,mod_define)
+        os.mkdir(includeDirectory)
+        os.mkdir(libDirectory)
+
+        os.cp(path.join(os.projectdir(), "src", "mod", "LLTranslatorApi.h"), includeDirectory)
+        os.cp(path.join(target:targetdir(), "TranslatorApi.lib"), libDirectory)
     end)
