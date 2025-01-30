@@ -6,6 +6,9 @@ AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
 
 namespace translator {
 
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
+    MainManager::translationCommandDescription = {};
+
 void MainManager::setTranslationForCommandDescription(
     const std::string& commandName,
     const std::string& description,
