@@ -2,6 +2,8 @@
 #include <ll/api/service/Bedrock.h>
 #include <mc/server/commands/CommandRegistry.h>
 
+AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
+
 namespace translator {
 
 void MainManager::setTranslationForCommandDescription(
