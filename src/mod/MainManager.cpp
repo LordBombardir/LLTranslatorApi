@@ -38,12 +38,12 @@ std::optional<std::string>
 MainManager::getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode) {
     auto firstIt = translationCommandDescription.find(commandName);
     if (firstIt == translationCommandDescription.end()) {
-        return std::make_optional<std::string>();
+        return std::nullopt;
     }
 
     auto secondIt = firstIt->second.find(localeCode);
     if (secondIt == firstIt->second.end()) {
-        return std::make_optional<std::string>();
+        return std::nullopt;
     }
 
     return secondIt->second;
