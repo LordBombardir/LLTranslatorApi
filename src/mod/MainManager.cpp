@@ -3,6 +3,7 @@
 #include <mc/server/commands/CommandRegistry.h>
 
 AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
+AvailableCommandsPacket::OverloadData::OverloadData(const OverloadData&) = default;
 
 namespace translator {
 
