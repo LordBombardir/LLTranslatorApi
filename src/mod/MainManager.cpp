@@ -2,8 +2,12 @@
 #include <ll/api/service/Bedrock.h>
 #include <mc/server/commands/CommandRegistry.h>
 
-AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
+AvailableCommandsPacket::EnumData::EnumData(const EnumData&) = default;
+AvailableCommandsPacket::SoftEnumData::SoftEnumData(const SoftEnumData&) = default;
+AvailableCommandsPacket::ConstrainedValueData::ConstrainedValueData(const ConstrainedValueData&) = default;
+AvailableCommandsPacket::ParamData::ParamData(const ParamData&) = default;
 AvailableCommandsPacket::OverloadData::OverloadData(const OverloadData&) = default;
+AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
 
 namespace translator {
 
