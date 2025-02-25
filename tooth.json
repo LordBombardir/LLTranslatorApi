@@ -7,8 +7,9 @@
         "description": "This mod is intended for developers who want to support multilingualism.",
         "author": "LordBombardir",
         "tags": [
-            "platform:levilamina",
-            "type:mod"
+            "levilamina",
+            "mod",
+            "api"
         ]
     },
     "asset_url": "https://github.com/LordBombardir/LLTranslatorApi/releases/download/v1.0.1/LLTranslatorApi-windows-x64.zip",
