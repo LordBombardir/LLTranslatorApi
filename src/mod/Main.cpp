@@ -1,4 +1,5 @@
 #include "Main.h"
+#include "Hooks.h"
 #include <ll/api/mod/RegisterHelper.h>
 
 namespace translator {
@@ -9,6 +10,7 @@ Main& Main::getInstance() {
 }
 
 bool Main::load() {
+    Hooks::setupHooks();
     return true;
 }
 

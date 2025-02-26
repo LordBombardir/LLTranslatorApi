@@ -18,6 +18,31 @@ getTranslationForCommandDescription(const std::string& commandName, const std::s
     return translator::MainManager::getTranslationForCommandDescription(commandName, localeCode);
 }
 
-AvailableCommandsPacket getAvailableCommandsPacket(Player& player) {
-    return translator::MainManager::getAvailableCommandsPacket(player);
+std::string addFunctionToProcessingPacket(const std::function<void(AvailableCommandsPacket&)>& function) {
+    return addFunctionToProcessingPacket(false, false, std::nullopt, function);
+}
+
+std::string addFunctionToProcessingPacket(bool isFirst, const std::function<void(AvailableCommandsPacket&)>& function) {
+    return addFunctionToProcessingPacket(isFirst, false, std::nullopt, function);
+}
+
+std::string addFunctionToProcessingPacket(
+    bool                                                 isFirst,
+    bool                                                 isOnce,
+    const std::function<void(AvailableCommandsPacket&)>& function
+) {
+    return addFunctionToProcessingPacket(isFirst, isOnce, std::nullopt, function);
+}
+
+std::string addFunctionToProcessingPacket(
+    bool                                                 isFirst,
+    bool                                                 isOnce,
+    const std::optional<std::string>&                    forPlayer,
+    const std::function<void(AvailableCommandsPacket&)>& function
+) {
+    return translator::MainManager::addFunctionProcessingPacket(isFirst, isOnce, forPlayer, function);
+}
+
+void removeFunctionToProcessingPacket(const std::string& id) {
+    translator::MainManager::removeFunctionProcessingPacket(id);
 }

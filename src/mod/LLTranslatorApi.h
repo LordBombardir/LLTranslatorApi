@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <mc/network/packet/AvailableCommandsPacket.h>
 #include <mc/world/actor/player/Player.h>
 #include <optional>
@@ -23,7 +24,19 @@ TRANSLATOR_API void
 removeTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode);
 
 TRANSLATOR_API std::optional<std::string>
-getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode);
+               getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode);
 
-TRANSLATOR_API AvailableCommandsPacket getAvailableCommandsPacket(Player& player);
+TRANSLATOR_API std::string addFunctionToProcessingPacket(const std::function<void(AvailableCommandsPacket&)>& function);
+TRANSLATOR_API             std::string
+addFunctionToProcessingPacket(bool isFirst, const std::function<void(AvailableCommandsPacket&)>& function);
+TRANSLATOR_API std::string
+addFunctionToProcessingPacket(bool isFirst, bool isOnce, const std::function<void(AvailableCommandsPacket&)>& function);
+TRANSLATOR_API std::string addFunctionToProcessingPacket(
+    bool                                                 isFirst,
+    bool                                                 isOnce,
+    const std::optional<std::string>&                    forPlayer,
+    const std::function<void(AvailableCommandsPacket&)>& function
+);
+
+TRANSLATOR_API void removeFunctionToProcessingPacket(const std::string& id);
 }
