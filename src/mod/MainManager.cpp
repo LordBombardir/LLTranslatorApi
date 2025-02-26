@@ -15,7 +15,7 @@ namespace translator {
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
     MainManager::translationCommandDescription = {};
 
-std::unordered_map<std::string, MainManager::FunctionProcessing> MainManager::functionsForProcessing;
+std::unordered_map<std::string, MainManager::FunctionProcessing> MainManager::functionsForProcessing = {};
 
 void MainManager::setTranslationForCommandDescription(
     const std::string& commandName,
