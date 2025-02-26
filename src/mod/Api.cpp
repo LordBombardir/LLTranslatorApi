@@ -46,3 +46,10 @@ std::string addFunctionToProcessingPacket(
 void removeFunctionToProcessingPacket(const std::string& id) {
     translator::MainManager::removeFunctionProcessingPacket(id);
 }
+
+void sendPlayerAvailableCommandsPacket(const Player& player) {
+    translator::MainManager::getAvailableCommandsPacket(player).sendToClient(
+        player.getNetworkIdentifier(),
+        player.getClientSubId()
+    );
+}

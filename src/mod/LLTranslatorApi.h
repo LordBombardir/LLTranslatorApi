@@ -39,4 +39,7 @@ TRANSLATOR_API std::string addFunctionToProcessingPacket(
 );
 
 TRANSLATOR_API void removeFunctionToProcessingPacket(const std::string& id);
+
+TRANSLATOR_API void sendPlayerAvailableCommandsPacket(const Player& player);
+
 }
