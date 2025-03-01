@@ -2,27 +2,24 @@
 #include "MainManager.h"
 #include <ll/api/memory/Hook.h>
 #include <mc/network/ServerNetworkHandler.h>
-#include <mc/network/packet/SetLocalPlayerAsInitializedPacket.h>
 #include <mc/server/ServerPlayer.h>
 
 namespace translator {
 
 LL_TYPE_INSTANCE_HOOK(
-    PlayerJoinHook,
+    PlayerConnectHook,
     HookPriority::Normal,
     ServerNetworkHandler,
-    &ServerNetworkHandler::$handle,
+    &ServerNetworkHandler::sendLoginMessageLocal,
     void,
-    const NetworkIdentifier&                 identifier,
-    const SetLocalPlayerAsInitializedPacket& packet
+    const NetworkIdentifier& networkIdentifier,
+    const ConnectionRequest& connectionRequest,
+    ServerPlayer&            player
 ) {
-    if (ServerPlayer* player = thisFor<NetEventCallback>()->_getServerPlayer(identifier, packet.mClientSubId); player) {
-        MainManager::getAvailableCommandsPacket(*player).sendToClient(identifier, packet.mClientSubId);
-    }
-
-    origin(identifier, packet);
+    MainManager::getAvailableCommandsPacket(player).sendToClient(networkIdentifier, player.getClientSubId());
+    origin(networkIdentifier, connectionRequest, player);
 }
 
-void Hooks::setupHooks() { PlayerJoinHook::hook(); }
+void Hooks::setupHooks() { PlayerConnectHook::hook(); }
 
 } // namespace translator
