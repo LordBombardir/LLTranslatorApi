@@ -16,8 +16,8 @@ LL_TYPE_INSTANCE_HOOK(
     const ConnectionRequest& connectionRequest,
     ServerPlayer&            player
 ) {
-    MainManager::getAvailableCommandsPacket(player).sendToClient(networkIdentifier, player.getClientSubId());
     origin(networkIdentifier, connectionRequest, player);
+    MainManager::getAvailableCommandsPacket(player).sendToClient(networkIdentifier, player.getClientSubId());
 }
 
 void Hooks::setupHooks() { PlayerConnectHook::hook(); }
