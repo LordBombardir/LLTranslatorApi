@@ -24,25 +24,8 @@ public:
 
     static AvailableCommandsPacket getAvailableCommandsPacket(const Player& player);
 
-    static std::string addFunctionProcessingPacket(
-        bool                                                 isFirst,
-        bool                                                 isOnce,
-        const std::optional<std::string>&                    forPlayer,
-        const std::function<void(AvailableCommandsPacket&)>& function
-    );
-
-    static void removeFunctionProcessingPacket(const std::string& id);
-
 private:
-    struct FunctionProcessing {
-        bool                                          isFirst;
-        bool                                          isOnce;
-        std::optional<std::string>                    forPlayer;
-        std::function<void(AvailableCommandsPacket&)> function;
-    };
-
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> translationCommandDescription;
-    static std::unordered_map<std::string, FunctionProcessing>                           functionsForProcessing;
 };
 
 } // namespace translator

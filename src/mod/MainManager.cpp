@@ -1,5 +1,4 @@
 #include "MainManager.h"
-#include "Utils.h"
 #include <ll/api/service/Bedrock.h>
 #include <mc/server/commands/CommandRegistry.h>
 
@@ -14,8 +13,6 @@ namespace translator {
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
     MainManager::translationCommandDescription = {};
-
-std::unordered_map<std::string, MainManager::FunctionProcessing> MainManager::functionsForProcessing = {};
 
 void MainManager::setTranslationForCommandDescription(
     const std::string& commandName,
@@ -61,56 +58,15 @@ AvailableCommandsPacket MainManager::getAvailableCommandsPacket(const Player& pl
     AvailableCommandsPacket packet = ll::service::getCommandRegistry()->serializeAvailableCommands();
     std::vector<AvailableCommandsPacket::CommandData>& commands = packet.mCommands.get();
 
-    for (const auto& [id, function] : functionsForProcessing) {
-        if (function.forPlayer.value_or(player.getRealName()) != player.getRealName()) {
-            continue;
-        }
-
-        if (function.isFirst) {
-            function.function(packet);
-        }
-
-        for (AvailableCommandsPacket::CommandData& command : commands) {
-            std::optional<std::string> translationForCommandDescription =
-                getTranslationForCommandDescription(command.name.get(), player.getLocaleCode());
-            if (translationForCommandDescription.has_value()) {
-                command.description = translationForCommandDescription.value();
-            }
-        }
-
-        if (!function.isFirst) {
-            function.function(packet);
-        }
-
-        if (function.isOnce) {
-            removeFunctionProcessingPacket(id);
+    for (AvailableCommandsPacket::CommandData& command : commands) {
+        std::optional<std::string> translationForCommandDescription =
+            getTranslationForCommandDescription(command.name.get(), player.getLocaleCode());
+        if (translationForCommandDescription.has_value()) {
+            command.description = translationForCommandDescription.value();
         }
     }
 
     return packet;
-}
-
-std::string MainManager::addFunctionProcessingPacket(
-    bool                                                 isFirst,
-    bool                                                 isOnce,
-    const std::optional<std::string>&                    forPlayer,
-    const std::function<void(AvailableCommandsPacket&)>& function
-) {
-    std::string id = Utils::generateRandomHex();
-    if (functionsForProcessing.contains(id)) {
-        return addFunctionProcessingPacket(isFirst, isOnce, forPlayer, function);
-    }
-
-    functionsForProcessing[id] = MainManager::FunctionProcessing{isFirst, isOnce, forPlayer, function};
-    return id;
-}
-
-void MainManager::removeFunctionProcessingPacket(const std::string& id) {
-    if (!functionsForProcessing.contains(id)) {
-        return;
-    }
-
-    functionsForProcessing.erase(id);
 }
 
 } // namespace translator
