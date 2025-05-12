@@ -5,7 +5,7 @@ add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 -- add_requires("levilamina x.x.x") for a specific version
 -- add_requires("levilamina develop") to use develop version
 -- please note that you should add bdslibrary yourself if using dev version
-add_requires("levilamina 1.1.0")
+add_requires("levilamina d490642c0e5e2ceb0ee8f0a8c3665e73654cd752")
 add_requires("levibuildscript")
 
 if not has_config("vs_runtime") then
@@ -16,12 +16,14 @@ target("TranslatorApi") -- Change this to your mod name.
     add_rules("@levibuildscript/linkrule")
     add_rules("@levibuildscript/modpacker")
 
-    add_cxflags( "/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
+    add_cxflags("/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
     add_defines("NOMINMAX", "UNICODE", "_HAS_CXX23=1", "TRANSLATORAPI_EXPORT")
+
     add_packages("levilamina")
     set_exceptions("none") -- To avoid conflicts with /EHa.
     set_kind("shared")
     set_languages("c++20")
+
     set_symbols("debug")
     add_files("src/**.cpp")
     add_includedirs("src")

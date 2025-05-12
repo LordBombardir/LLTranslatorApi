@@ -1,13 +1,12 @@
 #pragma once
 
-#include <functional>
 #include <mc/network/packet/AvailableCommandsPacket.h>
 #include <mc/world/actor/player/Player.h>
 #include <optional>
 #include <string>
 #include <unordered_map>
 
-namespace translator {
+namespace translator::manager {
 
 class MainManager final {
 public:
@@ -28,4 +27,4 @@ private:
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> translationCommandDescription;
 };
 
-} // namespace translator
+} // namespace translator::manager

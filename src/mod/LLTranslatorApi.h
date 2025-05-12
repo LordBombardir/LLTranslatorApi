@@ -5,13 +5,17 @@
 #include <optional>
 #include <string>
 
+#ifndef TRANSLATORAPI_API
 #ifdef TRANSLATORAPI_EXPORT
 #define TRANSLATOR_API __declspec(dllexport)
 #else
 #define TRANSLATOR_API __declspec(dllimport)
 #endif
+#endif
 
 extern "C++" {
+
+namespace translator::api {
 
 TRANSLATOR_API void setTranslationForCommandDescription(
     const std::string& commandName,
@@ -29,4 +33,5 @@ TRANSLATOR_API AvailableCommandsPacket getAvailableCommandsPacket(const Player& 
 
 TRANSLATOR_API void sendPlayerAvailableCommandsPacket(const Player& player);
 
+} // namespace translator::api
 }

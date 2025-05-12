@@ -9,7 +9,7 @@ AvailableCommandsPacket::ParamData::ParamData(const ParamData&)                 
 AvailableCommandsPacket::OverloadData::OverloadData(const OverloadData&)                         = default;
 AvailableCommandsPacket::CommandData::CommandData(const CommandData&)                            = default;
 
-namespace translator {
+namespace translator::manager {
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
     MainManager::translationCommandDescription = {};
@@ -69,4 +69,4 @@ AvailableCommandsPacket MainManager::getAvailableCommandsPacket(const Player& pl
     return packet;
 }
 
-} // namespace translator
+} // namespace translator::manager

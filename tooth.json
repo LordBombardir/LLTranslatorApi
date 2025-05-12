@@ -1,24 +1,50 @@
 {
-    "format_version": 2,
+    "format_version": 3,
+    "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/LordBombardir/LLTranslatorApi",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "info": {
         "name": "TranslatorApi",
         "description": "This mod is intended for developers who want to support multilingualism.",
-        "author": "LordBombardir",
         "tags": [
-            "levilamina",
-            "mod",
-            "api"
+            "platform:levilamina",
+            "type:mod"
         ]
     },
-    "asset_url": "https://github.com/LordBombardir/LLTranslatorApi/releases/download/v1.1.1/LLTranslatorApi-windows-x64.zip",
-    "files": {
-        "place": [
-            {
-                "src": "TranslatorApi/*",
-                "dest": "plugins/TranslatorApi/"
+    "variants": [
+        {
+            "label": "",
+            "platform": "win-x64",
+            "dependencies": {
+                "github.com/LiteLDev/LeviLamina": ">=1.2.0"
+            },
+            "assets": [
+                {
+                    "type": "zip",
+                    "urls": [
+                        "https://{{tooth}}/releases/download/v{{version}}/LLTranslatorApi-windows-x64.zip"
+                    ],
+                    "placements": [
+                        {
+                            "type": "dir",
+                            "src": "TranslatorApi/",
+                            "dest": "plugins/TranslatorApi/"
+                        }
+                    ]
+                }
+            ],
+            "preserve_files": [],
+            "remove_files": [],
+            "scripts": {
+                "pre_install": [],
+                "install": [],
+                "post_install": [],
+                "pre_pack": [],
+                "post_pack": [],
+                "pre_uninstall": [],
+                "uninstall": [],
+                "post_uninstall": []
             }
-        ]
-    }
+        }
+    ]
 }

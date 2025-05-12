@@ -1,10 +1,10 @@
 #include "Hooks.h"
-#include "MainManager.h"
+#include "../manager/MainManager.h"
 #include <ll/api/memory/Hook.h>
 #include <mc/network/ServerNetworkHandler.h>
 #include <mc/server/ServerPlayer.h>
 
-namespace translator {
+namespace translator::hooks {
 
 LL_TYPE_INSTANCE_HOOK(
     PlayerConnectHook,
@@ -17,9 +17,9 @@ LL_TYPE_INSTANCE_HOOK(
     ServerPlayer&            player
 ) {
     origin(networkIdentifier, connectionRequest, player);
-    MainManager::getAvailableCommandsPacket(player).sendToClient(networkIdentifier, player.getClientSubId());
+    manager::MainManager::getAvailableCommandsPacket(player).sendToClient(networkIdentifier, player.getClientSubId());
 }
 
 void Hooks::setupHooks() { PlayerConnectHook::hook(); }
 
-} // namespace translator
+} // namespace translator::hooks

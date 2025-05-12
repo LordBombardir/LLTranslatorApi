@@ -1,30 +1,34 @@
 #include "LLTranslatorApi.h"
-#include "MainManager.h"
+#include "manager/MainManager.h"
+
+namespace translator::api {
 
 void setTranslationForCommandDescription(
     const std::string& commandName,
     const std::string& description,
     const std::string& localeCode
 ) {
-    translator::MainManager::setTranslationForCommandDescription(commandName, description, localeCode);
+    manager::MainManager::setTranslationForCommandDescription(commandName, description, localeCode);
 }
 
 void removeTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode) {
-    translator::MainManager::removeTranslationForCommandDescription(commandName, localeCode);
+    manager::MainManager::removeTranslationForCommandDescription(commandName, localeCode);
 }
 
 std::optional<std::string>
 getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode) {
-    return translator::MainManager::getTranslationForCommandDescription(commandName, localeCode);
+    return manager::MainManager::getTranslationForCommandDescription(commandName, localeCode);
 }
 
 AvailableCommandsPacket getAvailableCommandsPacket(const Player& player) {
-    return translator::MainManager::getAvailableCommandsPacket(player);
+    return manager::MainManager::getAvailableCommandsPacket(player);
 }
 
 void sendPlayerAvailableCommandsPacket(const Player& player) {
-    translator::MainManager::getAvailableCommandsPacket(player).sendToClient(
+    manager::MainManager::getAvailableCommandsPacket(player).sendToClient(
         player.getNetworkIdentifier(),
         player.getClientSubId()
     );
 }
+
+} // namespace translator::api
