@@ -1,4 +1,4 @@
-#include "LLTranslatorApi.h"
+#include "Api.h"
 #include "manager/MainManager.h"
 
 namespace translator::api {

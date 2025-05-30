@@ -30,12 +30,12 @@ target("TranslatorApi") -- Change this to your mod name.
     
     after_build(function (target)
         local binDirectory = path.join(os.projectdir(), "bin")
-        local includeDirectory = path.join(binDirectory, "include")
+        local includeDirectory = path.join(path.join(binDirectory, "include"), "translator_api")
         local libDirectory = path.join(binDirectory, "lib")
 
         os.mkdir(includeDirectory)
         os.mkdir(libDirectory)
 
-        os.cp(path.join(os.projectdir(), "src", "mod", "LLTranslatorApi.h"), includeDirectory)
+        os.cp(path.join(os.projectdir(), "src", "mod", "Api.h"), includeDirectory)
         os.cp(path.join(target:targetdir(), "TranslatorApi.lib"), libDirectory)
     end)
