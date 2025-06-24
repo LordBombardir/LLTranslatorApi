@@ -10,7 +10,7 @@ Main& Main::getInstance() {
 }
 
 bool Main::load() {
-    hooks::Hooks::setupHooks();
+    hooks::setupHooks();
     return true;
 }
 

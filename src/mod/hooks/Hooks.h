@@ -2,9 +2,6 @@
 
 namespace translator::hooks {
 
-class Hooks final {
-public:
-    static void setupHooks();
-};
+void setupHooks();
 
 } // namespace translator::hooks

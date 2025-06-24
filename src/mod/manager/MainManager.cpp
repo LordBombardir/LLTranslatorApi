@@ -55,11 +55,11 @@ MainManager::getTranslationForCommandDescription(const std::string& commandName,
 }
 
 AvailableCommandsPacket MainManager::getAvailableCommandsPacket(const Player& player) {
-    AvailableCommandsPacket packet = ll::service::getCommandRegistry()->serializeAvailableCommands();
+    AvailableCommandsPacket packet = std::move(ll::service::getCommandRegistry()->serializeAvailableCommands());
     std::vector<AvailableCommandsPacket::CommandData>& commands = packet.mCommands.get();
 
     for (AvailableCommandsPacket::CommandData& command : commands) {
-        std::optional<std::string> translationForCommandDescription =
+        const auto& translationForCommandDescription =
             getTranslationForCommandDescription(command.name.get(), player.getLocaleCode());
         if (translationForCommandDescription.has_value()) {
             command.description = translationForCommandDescription.value();
