@@ -20,6 +20,10 @@ getTranslationForCommandDescription(const std::string& commandName, const std::s
     return manager::MainManager::getTranslationForCommandDescription(commandName, localeCode);
 }
 
+AvailableCommandsPacket getAvailableCommandsPacket(const Player& player) {
+    return manager::MainManager::getAvailableCommandsPacket(player);
+}
+
 void sendPlayerAvailableCommandsPacket(const Player& player) {
     manager::MainManager::getAvailableCommandsPacket(player).sendToClient(
         player.getNetworkIdentifier(),

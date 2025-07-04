@@ -29,6 +29,8 @@ removeTranslationForCommandDescription(const std::string& commandName, const std
 TRANSLATOR_API std::optional<std::string>
                getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode);
 
+TRANSLATOR_API AvailableCommandsPacket getAvailableCommandsPacket(const Player& player);
+
 TRANSLATOR_API void sendPlayerAvailableCommandsPacket(const Player& player);
 
 } // namespace translator::api
