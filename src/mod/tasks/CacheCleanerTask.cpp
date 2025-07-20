@@ -23,7 +23,7 @@ bool CacheCleanerTask::init() {
     using namespace std::chrono_literals;
     ll::coro::keepThis([function = &function]() -> ll::coro::CoroTask<> {
         while (true) {
-            co_await 1min;
+            co_await 1s;
             (*function)();
         }
         co_return;

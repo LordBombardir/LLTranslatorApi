@@ -25,19 +25,23 @@ AvailableCommandsPacket::CommandData::CommandData(const CommandData&)           
 
 namespace translator::manager {
 
+static constexpr short timeRemained = 60;
+
 std::unordered_map<const Packet*, PlaceholdersManager::CachedPacket> PlaceholdersManager::cachedPackets = {};
 std::mutex                                                           PlaceholdersManager::cachedPacketsMutex;
 
-void PlaceholdersManager::cleanPacketsCache() {
+void PlaceholdersManager::cleanPacketsCache(bool forced) {
     std::lock_guard<std::mutex> lock(cachedPacketsMutex);
 
     for (auto it = cachedPackets.begin(); it != cachedPackets.end();) {
-        for (const Packet* packet : it->second.packets | std::views::values) {
-            delete packet;
-        }
+        if (--it->second.secondsToCleanRemain <= 0 || forced) {
+            for (const Packet* packet : it->second.packets | std::views::values) {
+                delete packet;
+            }
 
-        it->second.packets.clear();
-        it = cachedPackets.erase(it);
+            it->second.packets.clear();
+            it = cachedPackets.erase(it);
+        }
     }
 }
 
@@ -69,7 +73,12 @@ void PlaceholdersManager::addCachedPacket(
     const std::string& localeCode
 ) {
     std::lock_guard<std::mutex> lock(cachedPacketsMutex);
-    cachedPackets[originalPacket].packets[localeCode] = packet;
+
+    PlaceholdersManager::CachedPacket cachedPacket;
+    cachedPacket.secondsToCleanRemain = timeRemained;
+    cachedPacket.packets[localeCode]  = packet;
+
+    cachedPackets[originalPacket] = cachedPacket;
 }
 
 const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket, const std::string& localeCode) {
@@ -80,8 +89,10 @@ const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket,
         return nullptr;
     }
 
-    auto&       cachedPacket = firstIt->second;
-    const auto& packets      = cachedPacket.packets;
+    auto& cachedPacket                = firstIt->second;
+    cachedPacket.secondsToCleanRemain = timeRemained;
+
+    const auto& packets = cachedPacket.packets;
 
     auto secondIt = packets.find(localeCode);
     if (secondIt == packets.end()) {
@@ -227,13 +238,11 @@ std::string PlaceholdersManager::getPlayerLocaleCode(const NetworkIdentifier& id
 }
 
 std::unordered_map<std::string, std::string> PlaceholdersManager::getAllPlaceholders(const NetworkIdentifier& id) {
-    const auto* placeholders          = MainManager::getPlaceholders(getPlayerLocaleCode(id));
+    const auto& placeholders          = MainManager::getPlaceholders(getPlayerLocaleCode(id));
     const auto& temporaryPlaceholders = MainManager::getTemporaryPlaceholders();
 
     std::unordered_map<std::string, std::string> allPlaceholders = temporaryPlaceholders;
-    if (placeholders != nullptr) {
-        allPlaceholders.insert(placeholders->begin(), placeholders->end());
-    }
+    allPlaceholders.insert(placeholders.begin(), placeholders.end());
 
     return allPlaceholders;
 }

@@ -9,12 +9,13 @@ namespace translator::manager {
 
 class PlaceholdersManager final {
 public:
-    static void cleanPacketsCache();
+    static void cleanPacketsCache(bool forced = false);
 
     static const Packet& processPacket(const NetworkIdentifier& id, const Packet& packet);
 
 private:
     struct CachedPacket {
+        short secondsToCleanRemain;
         std::unordered_map<std::string, const Packet*> packets;
     };
 

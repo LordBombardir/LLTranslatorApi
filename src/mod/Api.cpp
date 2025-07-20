@@ -10,8 +10,8 @@ constexpr std::string generatePlaceholder(std::string_view placeholder) {
     return std::string(PREFIX_SCOPE) + std::string(placeholder);
 }
 
-constexpr std::string generateTemporaryPlaceholder(const std::string& replaceFor) {
-    const auto& uuid = Crypto::Hash::generateUUID(replaceFor.data(), replaceFor.size(), Crypto::Hash::HashType::Md5);
+std::string generateTemporaryPlaceholder(const std::string& replaceFor) {
+    const auto& uuid = Crypto::Hash::generateUUID(replaceFor.data(), static_cast<uint>(replaceFor.size()), Crypto::Hash::HashType::Md5);
     return std::string(PREFIX_SCOPE) + std::to_string(uuid.a + uuid.b);
 }
 
@@ -31,7 +31,7 @@ void removePlaceholder(const std::string& placeholder, const std::string& locale
     manager::MainManager::removePlaceholder(placeholder, localeCode);
 }
 
-const std::unordered_map<std::string, std::string>* getPlaceholders(const std::string& localeCode) {
+std::unordered_map<std::string, std::string> getPlaceholders(const std::string& localeCode) {
     return manager::MainManager::getPlaceholders(localeCode);
 }
 
@@ -39,7 +39,7 @@ std::optional<std::string> getTemporaryPlaceholder(const std::string& placeholde
     return manager::MainManager::getTemporaryPlaceholder(placeholder);
 }
 
-const std::unordered_map<std::string, std::string>& getTemporaryPlaceholders() {
+std::unordered_map<std::string, std::string> getTemporaryPlaceholders() {
     return manager::MainManager::getTemporaryPlaceholders();
 }
 
