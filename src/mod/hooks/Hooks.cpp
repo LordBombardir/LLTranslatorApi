@@ -19,7 +19,7 @@ LL_STATIC_HOOK(
 
 LL_TYPE_INSTANCE_HOOK(
     NetworkSystemSendToMultipleHook,
-    HookPriority::Highest,
+    HookPriority::Normal,
     NetworkSystem,
     &NetworkSystem::sendToMultiple,
     void,
@@ -33,7 +33,7 @@ LL_TYPE_INSTANCE_HOOK(
 
 LL_TYPE_INSTANCE_HOOK(
     NetworkSystemSendHook,
-    HookPriority::Highest,
+    HookPriority::Normal,
     NetworkSystem,
     &NetworkSystem::send,
     void,

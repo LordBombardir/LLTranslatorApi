@@ -18,6 +18,7 @@ namespace translator::api {
 
 // DO NOT use for commands!
 TRANSLATOR_API constexpr std::string generatePlaceholder(std::string_view placeholder);
+TRANSLATOR_API constexpr std::string generateTemporaryPlaceholder(const std::string& replaceFor);
 
 // Use generatePlaceholder!
 TRANSLATOR_API void
@@ -27,7 +28,11 @@ TRANSLATOR_API std::optional<std::string> getPlaceholder(const std::string& plac
 
 TRANSLATOR_API void removePlaceholder(const std::string& placeholder, const std::string& localeCode);
 
-TRANSLATOR_API std::unordered_map<std::string, std::string> getPlaceholders(const std::string& localeCode);
+TRANSLATOR_API const std::unordered_map<std::string, std::string>* getPlaceholders(const std::string& localeCode);
+
+TRANSLATOR_API std::optional<std::string> getTemporaryPlaceholder(const std::string& placeholder);
+
+TRANSLATOR_API const std::unordered_map<std::string, std::string>& getTemporaryPlaceholders();
 
 } // namespace translator::api
 }

@@ -114,7 +114,7 @@ const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id
 
     TextPacket* newPacket = new TextPacket(castedPacket);
 
-    for (const auto& [placeholder, replaceFor] : MainManager::getPlaceholders(getPlayerLocaleCode(id))) {
+    for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
         newPacket->mMessage = Utils::strReplace(newPacket->mMessage, placeholder, replaceFor);
 
         if (!newPacket->mMessage.contains(PREFIX_SCOPE)) {
@@ -141,7 +141,7 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : MainManager::getPlaceholders(getPlayerLocaleCode(id))) {
+        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
             data = Utils::strReplace(data, placeholder, replaceFor);
             if (!data.contains(PREFIX_SCOPE)) {
                 break;
@@ -169,7 +169,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : MainManager::getPlaceholders(getPlayerLocaleCode(id))) {
+        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
             data = Utils::strReplace(data, placeholder, replaceFor);
             if (!data.contains(PREFIX_SCOPE)) {
                 break;
@@ -197,7 +197,7 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : MainManager::getPlaceholders(getPlayerLocaleCode(id))) {
+        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
             data = Utils::strReplace(data, placeholder, replaceFor);
             if (!data.contains(PREFIX_SCOPE)) {
                 break;
@@ -224,6 +224,18 @@ std::string PlaceholdersManager::getPlayerLocaleCode(const NetworkIdentifier& id
     }
 
     return "";
+}
+
+std::unordered_map<std::string, std::string> PlaceholdersManager::getAllPlaceholders(const NetworkIdentifier& id) {
+    const auto* placeholders          = MainManager::getPlaceholders(getPlayerLocaleCode(id));
+    const auto& temporaryPlaceholders = MainManager::getTemporaryPlaceholders();
+
+    std::unordered_map<std::string, std::string> allPlaceholders = temporaryPlaceholders;
+    if (placeholders != nullptr) {
+        allPlaceholders.insert(placeholders->begin(), placeholders->end());
+    }
+
+    return allPlaceholders;
 }
 
 void PlaceholdersManager::replaceDataItemStringValue(

@@ -2,7 +2,7 @@
     "format_version": 3,
     "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/LordBombardir/LLTranslatorApi",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "info": {
         "name": "TranslatorApi",
         "description": "This mod is intended for developers who want to support multilingualism.",

@@ -31,7 +31,11 @@ private:
     static const Packet& processSetActorDataPacket(const NetworkIdentifier& id, const Packet& packet);
 
     static std::string getPlayerLocaleCode(const NetworkIdentifier& id);
-    static void replaceDataItemStringValue(std::vector<std::unique_ptr<DataItem>>& mData, ushort id, const std::string& value);
+
+    static std::unordered_map<std::string, std::string> getAllPlaceholders(const NetworkIdentifier& id);
+
+    static void
+    replaceDataItemStringValue(std::vector<std::unique_ptr<DataItem>>& mData, ushort id, const std::string& value);
 };
 
 } // namespace translator::manager
