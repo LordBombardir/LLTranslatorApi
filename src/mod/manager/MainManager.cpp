@@ -1,52 +1,34 @@
 #include "MainManager.h"
-#include <ll/api/service/Bedrock.h>
-#include <mc/server/commands/CommandRegistry.h>
-
-AvailableCommandsPacket::EnumData::EnumData(const EnumData&)                                     = default;
-AvailableCommandsPacket::SoftEnumData::SoftEnumData(const SoftEnumData&)                         = default;
-AvailableCommandsPacket::ConstrainedValueData::ConstrainedValueData(const ConstrainedValueData&) = default;
-AvailableCommandsPacket::ParamData::ParamData(const ParamData&)                                  = default;
-AvailableCommandsPacket::OverloadData::OverloadData(const OverloadData&)                         = default;
-AvailableCommandsPacket::CommandData::CommandData(const CommandData&)                            = default;
+#include "config/ConfigManager.h"
+#include "placeholders/PlaceholdersManager.h"
 
 namespace translator::manager {
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
-    MainManager::translationCommandDescription = {};
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> MainManager::placeholders = {};
 
-void MainManager::setTranslationForCommandDescription(
-    const std::string& commandName,
-    const std::string& description,
+bool MainManager::initManagers(ll::mod::NativeMod& mod) { return ConfigManager::init(mod); }
+
+void MainManager::disposeManagers() { PlaceholdersManager::cleanPacketsCache(); }
+
+void MainManager::setPlaceholder(
+    const std::string& placeholder,
+    const std::string& replaceFor,
     const std::string& localeCode
 ) {
-    translationCommandDescription[commandName][localeCode] = description;
+    placeholders[localeCode][placeholder] = replaceFor;
 }
 
-void MainManager::removeTranslationForCommandDescription(
-    const std::string& commandName,
-    const std::string& localeCode
-) {
-    auto firstIt = translationCommandDescription.find(commandName);
-    if (firstIt == translationCommandDescription.end()) {
-        return;
+std::optional<std::string> MainManager::getPlaceholder(const std::string& placeholder, const std::string& localeCode) {
+    auto firstIt = placeholders.find(localeCode);
+    if (firstIt == placeholders.end()) {
+        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
+            return std::nullopt;
+        }
+
+        return getPlaceholder(placeholder, ConfigManager::getConfig().defaultLocaleCode);
     }
 
-    auto secondIt = firstIt->second.find(localeCode);
-    if (secondIt == firstIt->second.end()) {
-        return;
-    }
-
-    firstIt->second.erase(secondIt);
-}
-
-std::optional<std::string>
-MainManager::getTranslationForCommandDescription(const std::string& commandName, const std::string& localeCode) {
-    auto firstIt = translationCommandDescription.find(commandName);
-    if (firstIt == translationCommandDescription.end()) {
-        return std::nullopt;
-    }
-
-    auto secondIt = firstIt->second.find(localeCode);
+    auto secondIt = firstIt->second.find(placeholder);
     if (secondIt == firstIt->second.end()) {
         return std::nullopt;
     }
@@ -54,19 +36,27 @@ MainManager::getTranslationForCommandDescription(const std::string& commandName,
     return secondIt->second;
 }
 
-AvailableCommandsPacket MainManager::getAvailableCommandsPacket(const Player& player) {
-    AvailableCommandsPacket packet = std::move(ll::service::getCommandRegistry()->serializeAvailableCommands());
-    std::vector<AvailableCommandsPacket::CommandData>& commands = packet.mCommands.get();
-
-    for (AvailableCommandsPacket::CommandData& command : commands) {
-        const auto& translationForCommandDescription =
-            getTranslationForCommandDescription(command.name.get(), player.getLocaleCode());
-        if (translationForCommandDescription.has_value()) {
-            command.description = translationForCommandDescription.value();
-        }
+void MainManager::removePlaceholder(const std::string& placeholder, const std::string& localeCode) {
+    auto firstIt = placeholders.find(localeCode);
+    if (firstIt == placeholders.end()) {
+        return;
     }
 
-    return packet;
+    auto secondIt = firstIt->second.find(placeholder);
+    if (secondIt == firstIt->second.end()) {
+        return;
+    }
+
+    firstIt->second.erase(secondIt);
+}
+
+std::unordered_map<std::string, std::string> MainManager::getPlaceholders(const std::string& localeCode) {
+    auto it = placeholders.find(localeCode);
+    if (it == placeholders.end()) {
+        return {};
+    }
+
+    return it->second;
 }
 
 } // namespace translator::manager

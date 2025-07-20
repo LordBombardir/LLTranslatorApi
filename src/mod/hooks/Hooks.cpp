@@ -1,28 +1,56 @@
 #include "Hooks.h"
-#include "../manager/MainManager.h"
+#include "../manager/config/ConfigManager.h"
+#include "../manager/placeholders/PlaceholdersManager.h"
+#include <ll/api/i18n/I18n.h>
 #include <ll/api/memory/Hook.h>
-#include <mc/network/ServerNetworkHandler.h>
-#include <mc/network/packet/SetLocalPlayerAsInitializedPacket.h>
-#include <mc/server/ServerPlayer.h>
+#include <mc/network/NetworkIdentifierWithSubId.h>
+#include <mc/network/NetworkSystem.h>
 
 namespace translator::hooks {
 
-LL_TYPE_INSTANCE_HOOK(
-    PlayerJoinHook,
+LL_STATIC_HOOK(
+    LeviLaminaDefaultLocaleCodeHook,
     HookPriority::Normal,
-    ServerNetworkHandler,
-    &ServerNetworkHandler::$handle,
-    void,
-    const NetworkIdentifier&                 identifier,
-    const SetLocalPlayerAsInitializedPacket& packet
+    &ll::i18n::getDefaultLocaleCode,
+    std::string_view
 ) {
-    if (ServerPlayer* player = thisFor<NetEventCallback>()->_getServerPlayer(identifier, packet.mSenderSubId); player) {
-        manager::MainManager::getAvailableCommandsPacket(*player).sendToClient(identifier, player->getClientSubId());
-    }
-
-    origin(identifier, packet);
+    return manager::ConfigManager::getConfig().defaultLocaleCode;
 }
 
-void setupHooks() { PlayerJoinHook::hook(); }
+LL_TYPE_INSTANCE_HOOK(
+    NetworkSystemSendToMultipleHook,
+    HookPriority::Highest,
+    NetworkSystem,
+    &NetworkSystem::sendToMultiple,
+    void,
+    const std::vector<NetworkIdentifierWithSubId>& ids,
+    const Packet&                                  packet
+) {
+    for (const NetworkIdentifierWithSubId& id : ids) {
+        thisFor<NetworkSystem>()->send(id.id, packet, id.subClientId);
+    }
+}
+
+LL_TYPE_INSTANCE_HOOK(
+    NetworkSystemSendHook,
+    HookPriority::Highest,
+    NetworkSystem,
+    &NetworkSystem::send,
+    void,
+    const NetworkIdentifier& id,
+    const Packet&            originalPacket,
+    SubClientId              recipientSubId
+) {
+    return origin(id, manager::PlaceholdersManager::processPacket(id, originalPacket), recipientSubId);
+}
+
+void setupHooks() {
+    if (manager::ConfigManager::getConfig().replaceLeviLaminaDefaultLocaleCode) {
+        LeviLaminaDefaultLocaleCodeHook::hook();
+    }
+
+    NetworkSystemSendToMultipleHook::hook();
+    NetworkSystemSendHook::hook();
+}
 
 } // namespace translator::hooks
