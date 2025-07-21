@@ -23,11 +23,16 @@ public:
 
     static std::unordered_map<std::string, std::string> getPlaceholders(const std::string& localeCode);
 
-    static void setTemporaryPlaceholder(const std::string& placeholder, const std::string& replaceFor);
+    static void setTemporaryPlaceholder(
+        const std::string& placeholder,
+        const std::string& replaceFor,
+        const std::string& localeCode
+    );
 
-    static std::optional<std::string> getTemporaryPlaceholder(const std::string& placeholder);
+    static std::optional<std::string>
+    getTemporaryPlaceholder(const std::string& placeholder, const std::string& localeCode);
 
-    static std::unordered_map<std::string, std::string> getTemporaryPlaceholders();
+    static std::unordered_map<std::string, std::string> getTemporaryPlaceholders(const std::string& localeCode);
 
 private:
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> placeholders;
@@ -37,8 +42,8 @@ private:
         std::string replaceFor;
     };
 
-    static std::unordered_map<std::string, TemporaryPlaceholder> temporaryPlaceholders;
-    static std::mutex                                            temporaryPlaceholdersMutex;
+    static std::unordered_map<std::string, std::unordered_map<std::string, TemporaryPlaceholder>> temporaryPlaceholders;
+    static std::mutex temporaryPlaceholdersMutex;
 };
 
 } // namespace translator::manager

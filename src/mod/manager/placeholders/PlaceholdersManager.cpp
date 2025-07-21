@@ -238,11 +238,13 @@ std::string PlaceholdersManager::getPlayerLocaleCode(const NetworkIdentifier& id
 }
 
 std::unordered_map<std::string, std::string> PlaceholdersManager::getAllPlaceholders(const NetworkIdentifier& id) {
-    const auto& placeholders          = MainManager::getPlaceholders(getPlayerLocaleCode(id));
-    const auto& temporaryPlaceholders = MainManager::getTemporaryPlaceholders();
+    const auto& localeCode = getPlayerLocaleCode(id);
 
-    std::unordered_map<std::string, std::string> allPlaceholders = temporaryPlaceholders;
-    allPlaceholders.insert(placeholders.begin(), placeholders.end());
+    const auto& placeholders          = MainManager::getPlaceholders(localeCode);
+    const auto& temporaryPlaceholders = MainManager::getTemporaryPlaceholders(localeCode);
+
+    std::unordered_map<std::string, std::string> allPlaceholders = placeholders;
+    allPlaceholders.insert(temporaryPlaceholders.begin(), temporaryPlaceholders.end());
 
     return allPlaceholders;
 }

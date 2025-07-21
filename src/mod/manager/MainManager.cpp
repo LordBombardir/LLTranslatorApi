@@ -8,7 +8,8 @@ static constexpr short timeRemained = 60;
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>> MainManager::placeholders = {};
 
-std::unordered_map<std::string, MainManager::TemporaryPlaceholder> MainManager::temporaryPlaceholders = {};
+std::unordered_map<std::string, std::unordered_map<std::string, MainManager::TemporaryPlaceholder>>
+    MainManager::temporaryPlaceholders = {};
 
 std::mutex MainManager::temporaryPlaceholdersMutex;
 
@@ -22,9 +23,11 @@ void MainManager::disposeManagers() {
 void MainManager::cleanTemporaryPlaceholders(bool forced) {
     std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
 
-    for (auto it = temporaryPlaceholders.begin(); it != temporaryPlaceholders.end();) {
-        if (--it->second.secondsToCleanRemain <= 0 || forced) {
-            it = temporaryPlaceholders.erase(it);
+    for (auto& [localeCode, temporaryPlaceholder] : temporaryPlaceholders) {
+        for (auto it = temporaryPlaceholder.begin(); it != temporaryPlaceholder.end();) {
+            if (--it->second.secondsToCleanRemain <= 0 || forced) {
+                it = temporaryPlaceholder.erase(it);
+            }
         }
     }
 }
@@ -78,33 +81,52 @@ std::unordered_map<std::string, std::string> MainManager::getPlaceholders(const 
     return it->second;
 }
 
-void MainManager::setTemporaryPlaceholder(const std::string& placeholder, const std::string& replaceFor) {
+void MainManager::setTemporaryPlaceholder(
+    const std::string& placeholder,
+    const std::string& replaceFor,
+    const std::string& localeCode
+) {
     std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
 
     MainManager::TemporaryPlaceholder temporaryPlaceholder;
     temporaryPlaceholder.secondsToCleanRemain = timeRemained;
     temporaryPlaceholder.replaceFor           = replaceFor;
 
-    temporaryPlaceholders[placeholder] = temporaryPlaceholder;
+    temporaryPlaceholders[localeCode][placeholder] = temporaryPlaceholder;
 }
 
-std::optional<std::string> MainManager::getTemporaryPlaceholder(const std::string& placeholder) {
+std::optional<std::string>
+MainManager::getTemporaryPlaceholder(const std::string& placeholder, const std::string& localeCode) {
     std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
 
-    auto it = temporaryPlaceholders.find(placeholder);
-    if (it == temporaryPlaceholders.end()) {
+    auto firstIt = temporaryPlaceholders.find(localeCode);
+    if (firstIt == temporaryPlaceholders.end()) {
+        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
+            return std::nullopt;
+        }
+
+        return getTemporaryPlaceholder(placeholder, ConfigManager::getConfig().defaultLocaleCode);
+    }
+
+    auto secondIt = firstIt->second.find(placeholder);
+    if (secondIt == firstIt->second.end()) {
         return std::nullopt;
     }
 
-    it->second.secondsToCleanRemain = timeRemained;
-    return it->second.replaceFor;
+    secondIt->second.secondsToCleanRemain = timeRemained;
+    return secondIt->second.replaceFor;
 }
 
-std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholders() {
+std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholders(const std::string& localeCode) {
     std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
 
+    auto it = temporaryPlaceholders.find(localeCode);
+    if (it == temporaryPlaceholders.end()) {
+        return {};
+    }
+
     std::unordered_map<std::string, std::string> result;
-    for (auto& [placeholder, temporaryPlaceholder] : temporaryPlaceholders) {
+    for (auto& [placeholder, temporaryPlaceholder] : it->second) {
         result[placeholder] = temporaryPlaceholder.replaceFor;
     }
 
