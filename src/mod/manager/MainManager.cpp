@@ -105,8 +105,6 @@ std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholde
 
     std::unordered_map<std::string, std::string> result;
     for (auto& [placeholder, temporaryPlaceholder] : temporaryPlaceholders) {
-        temporaryPlaceholder.secondsToCleanRemain = timeRemained;
-
         result[placeholder] = temporaryPlaceholder.replaceFor;
     }
 
