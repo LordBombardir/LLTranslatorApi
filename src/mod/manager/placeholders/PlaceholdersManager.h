@@ -30,6 +30,7 @@ private:
     static const Packet& processAddActorPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processAddPlayerPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processSetActorDataPacket(const NetworkIdentifier& id, const Packet& packet);
+    static const Packet& processShowModalFormRequestPacket(const NetworkIdentifier& id, const Packet& packet);
 
     static std::string getPlayerLocaleCode(const NetworkIdentifier& id);
 

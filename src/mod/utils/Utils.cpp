@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include "../Constants.h"
 #include <algorithm>
 #include <functional>
 
@@ -30,6 +31,19 @@ Utils::strReplace(std::string_view originalStr, std::string_view whatNeedToRepla
         result.append(whatForReplace);
         it = match + whatNeedToReplace.size();
     }
+
+    return result;
+}
+
+std::string
+Utils::strReplace(std::string_view originalStr, const std::unordered_map<std::string, std::string>& replacements) {
+    std::string result(originalStr);
+
+    do {
+        for (const auto& [whatNeedToReplace, whatForReplace] : replacements) {
+            std::string updated = Utils::strReplace(result, whatNeedToReplace, whatForReplace);
+        }
+    } while (result.contains(PREFIX_SCOPE)); // todo: изменить PREFIX_SCOPE на секретно-генерируемое уникальное значение.
 
     return result;
 }

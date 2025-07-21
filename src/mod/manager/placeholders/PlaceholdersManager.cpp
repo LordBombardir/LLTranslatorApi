@@ -9,6 +9,7 @@
 #include <mc/network/packet/AddActorPacket.h>
 #include <mc/network/packet/AddPlayerPacket.h>
 #include <mc/network/packet/AvailableCommandsPacket.h>
+#include <mc/network/packet/ModalFormRequestPacket.h>
 #include <mc/network/packet/SetActorDataPacket.h>
 #include <mc/network/packet/SyncedAttribute.h>
 #include <mc/network/packet/TextPacket.h>
@@ -62,6 +63,8 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
         return processAddPlayerPacket(id, packet);
     case MinecraftPacketIds::SetActorData:
         return processSetActorDataPacket(id, packet);
+    case MinecraftPacketIds::ShowModalForm:
+        return processShowModalFormRequestPacket(id, packet);
     default:
         return packet;
     }
@@ -102,19 +105,19 @@ const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket,
     return secondIt->second;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkIdentifier& id, const Packet& packet) {
-    AvailableCommandsPacket* newPacket =
-        new AvailableCommandsPacket(static_cast<const AvailableCommandsPacket&>(packet));
+    AvailableCommandsPacket& castedPacket =
+        const_cast<AvailableCommandsPacket&>(static_cast<const AvailableCommandsPacket&>(packet));
 
-    for (AvailableCommandsPacket::CommandData& command : *newPacket->mCommands) {
+    for (AvailableCommandsPacket::CommandData& command : *castedPacket.mCommands) {
         const auto& placeholder = MainManager::getPlaceholder(command.name, getPlayerLocaleCode(id));
         if (placeholder.has_value()) {
             command.description = *placeholder;
         }
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    return *newPacket;
+    return castedPacket;
 }
 
 const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id, const Packet& packet) {
@@ -124,14 +127,7 @@ const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id
     }
 
     TextPacket* newPacket = new TextPacket(castedPacket);
-
-    for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
-        newPacket->mMessage = Utils::strReplace(newPacket->mMessage, placeholder, replaceFor);
-
-        if (!newPacket->mMessage.contains(PREFIX_SCOPE)) {
-            break;
-        }
-    }
+    newPacket->mMessage   = Utils::strReplace(newPacket->mMessage, getAllPlaceholders(id));
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
@@ -152,13 +148,7 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
-            data = Utils::strReplace(data, placeholder, replaceFor);
-            if (!data.contains(PREFIX_SCOPE)) {
-                break;
-            }
-        }
-
+        data = Utils::strReplace(data, getAllPlaceholders(id));
         replaceDataItemStringValue(*castedPacket.mData, dataItem->getId(), data);
     }
 
@@ -180,13 +170,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
-            data = Utils::strReplace(data, placeholder, replaceFor);
-            if (!data.contains(PREFIX_SCOPE)) {
-                break;
-            }
-        }
-
+        data = Utils::strReplace(data, getAllPlaceholders(id));
         replaceDataItemStringValue(*castedPacket.mUnpack, dataItem->getId(), data);
     }
 
@@ -208,17 +192,25 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
             continue;
         }
 
-        for (const auto& [placeholder, replaceFor] : getAllPlaceholders(id)) {
-            data = Utils::strReplace(data, placeholder, replaceFor);
-            if (!data.contains(PREFIX_SCOPE)) {
-                break;
-            }
-        }
-
+        data = Utils::strReplace(data, getAllPlaceholders(id));
         replaceDataItemStringValue(castedPacket.mPackedItems, dataItem->getId(), data);
     }
 
     return castedPacket;
+}
+
+const Packet&
+PlaceholdersManager::processShowModalFormRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
+    const ModalFormRequestPacket& castedPacket = static_cast<const ModalFormRequestPacket&>(packet);
+    if (!castedPacket.mFormJSON->contains(PREFIX_SCOPE)) {
+        return packet;
+    }
+
+    ModalFormRequestPacket* newPacket = new ModalFormRequestPacket(castedPacket);
+    newPacket->mFormJSON = Utils::strReplace(*newPacket->mFormJSON, getAllPlaceholders(id));
+
+    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    return *newPacket;
 }
 
 std::string PlaceholdersManager::getPlayerLocaleCode(const NetworkIdentifier& id) {

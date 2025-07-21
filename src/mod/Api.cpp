@@ -15,10 +15,6 @@ std::string generateTemporaryPlaceholder() {
 }
 
 void setPlaceholder(const std::string& placeholder, const std::string& replaceFor, const std::string& localeCode) {
-    if (replaceFor.contains(PREFIX_SCOPE)) {
-        return;
-    }
-
     manager::MainManager::setPlaceholder(placeholder, replaceFor, localeCode);
 }
 
@@ -39,10 +35,6 @@ void setTemporaryPlaceholder(
     const std::string& replaceFor,
     const std::string& localeCode
 ) {
-    if (replaceFor.contains(PREFIX_SCOPE)) {
-        return;
-    }
-
     manager::MainManager::setTemporaryPlaceholder(placeholder, replaceFor, localeCode);
 }
 
