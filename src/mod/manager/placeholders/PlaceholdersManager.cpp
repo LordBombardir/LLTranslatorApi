@@ -267,10 +267,10 @@ void PlaceholdersManager::replaceDataItemStringValue(
     mData[index] = DataItem::create(id, value);
 }
 
-void replaceAllPlaceholders(
-    std::string&                                         value,
-    const std::unordered_map<std::string, std::string>&  placeholders,
-    const std::vector<std::string_view::const_iterator>& allOccurrences
+void PlaceholdersManager::replaceAllPlaceholders(
+    std::string&                                        value,
+    const std::unordered_map<std::string, std::string>& placeholders,
+    const std::vector<size_t>&                          allOccurrences
 ) {
     constexpr size_t prefixScopeLength = 16;
     constexpr size_t separatorLength   = 1;
@@ -279,22 +279,19 @@ void replaceAllPlaceholders(
     constexpr size_t totalKeyLength = prefixScopeLength + separatorLength + keyLength;
 
     bool replacedSomething = false;
-    for (const auto& occ : allOccurrences) {
-        size_t pos = static_cast<size_t>(&*occ - &*value.begin());
+    for (size_t pos : allOccurrences) {
         if (pos + totalKeyLength > value.size()) {
             continue;
         }
 
-        std::string_view placeholder(&*occ + prefixScopeLength + separatorLength, keyLength);
+        std::string_view placeholder(value.data() + pos, totalKeyLength);
 
         auto it = placeholders.find(std::string(placeholder));
         if (it == placeholders.end()) {
             continue;
         }
 
-        std::string_view fullPlaceholder(&*occ, totalKeyLength);
-        std::string      newValue = Utils::strReplace(value, fullPlaceholder, it->second);
-
+        std::string newValue = Utils::strReplace(value, placeholder, it->second);
         if (newValue != value) {
             value             = std::move(newValue);
             replacedSomething = true;

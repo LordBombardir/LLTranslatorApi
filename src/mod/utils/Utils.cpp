@@ -15,21 +15,20 @@ Utils::strReplace(std::string_view originalStr, std::string_view whatNeedToRepla
 
     auto matches = findAllOccurrences(originalStr, whatNeedToReplace);
 
-    auto it = originalStr.begin();
-    for (auto match : matches) {
-        result.append(it, match);
+    size_t lastPos = 0;
+    for (size_t matchPos : matches) {
+        result.append(originalStr.substr(lastPos, matchPos - lastPos));
         result.append(whatForReplace);
 
-        it = match + whatNeedToReplace.size();
+        lastPos = matchPos + whatNeedToReplace.size();
     }
 
-    result.append(it, originalStr.end());
+    result.append(originalStr.substr(lastPos));
     return result;
 }
 
-std::vector<std::string_view::const_iterator>
-Utils::findAllOccurrences(std::string_view haystack, std::string_view needle) {
-    std::vector<std::string_view::const_iterator> matches;
+std::vector<size_t> Utils::findAllOccurrences(std::string_view haystack, std::string_view needle) {
+    std::vector<size_t> matches;
     if (needle.empty()) {
         return matches;
     }
@@ -46,7 +45,9 @@ Utils::findAllOccurrences(std::string_view haystack, std::string_view needle) {
             break;
         }
 
-        matches.push_back(match);
+        size_t pos = static_cast<size_t>(std::distance(haystack.begin(), match));
+        matches.push_back(pos);
+
         it = match + needle.size();
     }
 
