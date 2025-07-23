@@ -1,6 +1,7 @@
 #include "MainManager.h"
 #include "config/ConfigManager.h"
 #include "placeholders/PlaceholdersManager.h"
+#include <ll/api/utils/HashUtils.h>
 
 namespace translator::manager {
 
@@ -30,6 +31,11 @@ void MainManager::cleanTemporaryPlaceholders(bool forced) {
             }
         }
     }
+}
+
+std::string MainManager::getPrefixScope() {
+    static std::string prefixScope = generateKey(16);
+    return prefixScope;
 }
 
 void MainManager::setPlaceholder(
@@ -128,6 +134,24 @@ std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholde
     std::unordered_map<std::string, std::string> result;
     for (auto& [placeholder, temporaryPlaceholder] : it->second) {
         result[placeholder] = temporaryPlaceholder.replaceFor;
+    }
+
+    return result;
+}
+
+std::string MainManager::generateKey(size_t length) {
+    static constexpr std::string_view charset = "abcdefghijklmnopqrstuvwxyz"
+                                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                "0123456789";
+
+    static thread_local std::mt19937                               rng{std::random_device{}()};
+    static thread_local std::uniform_int_distribution<std::size_t> dist(0, charset.size() - 1);
+
+    std::string result;
+    result.reserve(length);
+
+    for (std::size_t i = 0; i < length; ++i) {
+        result += charset[dist(rng)];
     }
 
     return result;

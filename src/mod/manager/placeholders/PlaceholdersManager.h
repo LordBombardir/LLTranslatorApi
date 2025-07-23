@@ -15,7 +15,7 @@ public:
 
 private:
     struct CachedPacket {
-        short secondsToCleanRemain;
+        short                                          secondsToCleanRemain;
         std::unordered_map<std::string, const Packet*> packets;
     };
 
@@ -38,6 +38,11 @@ private:
 
     static void
     replaceDataItemStringValue(std::vector<std::unique_ptr<DataItem>>& mData, ushort id, const std::string& value);
+    static void replaceAllPlaceholders(
+        std::string&                                         value,
+        const std::unordered_map<std::string, std::string>&  placeholders,
+        const std::vector<std::string_view::const_iterator>& allOccurrences
+    );
 };
 
 } // namespace translator::manager

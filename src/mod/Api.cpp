@@ -1,17 +1,23 @@
 #include "Api.h"
-#include "Constants.h"
 #include "manager/MainManager.h"
+#include <ll/api/utils/HashUtils.h>
 #include <mc/platform/UUID.h>
 
 namespace translator::api {
 
-constexpr std::string generatePlaceholder(std::string_view placeholder) {
-    return std::string(PREFIX_SCOPE) + std::string(placeholder);
+std::string hash(std::string_view string) {
+    std::ostringstream oss;
+
+    oss << std::hex << std::setw(16) << std::setfill('0') << ll::hash_utils::doHash(string);
+    return oss.str();
+}
+
+std::string generatePlaceholder(std::string_view placeholder) {
+    return std::format("{}:{}", manager::MainManager::getPrefixScope(), hash(placeholder));
 }
 
 std::string generateTemporaryPlaceholder() {
-    const auto& uuid = mce::UUID::random();
-    return std::string(PREFIX_SCOPE) + std::to_string(uuid.a + uuid.b);
+    return std::format("{}:{}", manager::MainManager::getPrefixScope(), hash(mce::UUID::random().asString()));
 }
 
 void setPlaceholder(const std::string& placeholder, const std::string& replaceFor, const std::string& localeCode) {

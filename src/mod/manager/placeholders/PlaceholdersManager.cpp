@@ -1,5 +1,4 @@
 #include "PlaceholdersManager.h"
-#include "../../Constants.h"
 #include "../../utils/Utils.h"
 #include "../MainManager.h"
 #include <ll/api/service/Bedrock.h>
@@ -122,12 +121,14 @@ const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkI
 
 const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id, const Packet& packet) {
     const TextPacket& castedPacket = static_cast<const TextPacket&>(packet);
-    if (!castedPacket.mMessage.contains(PREFIX_SCOPE)) {
+
+    const auto& allOccurrences = Utils::findAllOccurrences(castedPacket.mMessage, MainManager::getPrefixScope());
+    if (allOccurrences.empty()) {
         return packet;
     }
 
     TextPacket* newPacket = new TextPacket(castedPacket);
-    newPacket->mMessage   = Utils::strReplace(newPacket->mMessage, getAllPlaceholders(id));
+    replaceAllPlaceholders(newPacket->mMessage, getAllPlaceholders(id), allOccurrences);
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
@@ -144,11 +145,13 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
         }
 
         std::string data = dataItem->getData<std::string>();
-        if (!data.contains(PREFIX_SCOPE)) {
-            continue;
+
+        const auto& allOccurrences = Utils::findAllOccurrences(data, MainManager::getPrefixScope());
+        if (allOccurrences.empty()) {
+            return packet;
         }
 
-        data = Utils::strReplace(data, getAllPlaceholders(id));
+        replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(*castedPacket.mData, dataItem->getId(), data);
     }
 
@@ -166,11 +169,13 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
         }
 
         std::string data = dataItem->getData<std::string>();
-        if (!data.contains(PREFIX_SCOPE)) {
-            continue;
+
+        const auto& allOccurrences = Utils::findAllOccurrences(data, MainManager::getPrefixScope());
+        if (allOccurrences.empty()) {
+            return packet;
         }
 
-        data = Utils::strReplace(data, getAllPlaceholders(id));
+        replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(*castedPacket.mUnpack, dataItem->getId(), data);
     }
 
@@ -188,11 +193,13 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
         }
 
         std::string data = dataItem->getData<std::string>();
-        if (!data.contains(PREFIX_SCOPE)) {
-            continue;
+
+        const auto& allOccurrences = Utils::findAllOccurrences(data, MainManager::getPrefixScope());
+        if (allOccurrences.empty()) {
+            return packet;
         }
 
-        data = Utils::strReplace(data, getAllPlaceholders(id));
+        replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(castedPacket.mPackedItems, dataItem->getId(), data);
     }
 
@@ -202,12 +209,14 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
 const Packet&
 PlaceholdersManager::processShowModalFormRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
     const ModalFormRequestPacket& castedPacket = static_cast<const ModalFormRequestPacket&>(packet);
-    if (!castedPacket.mFormJSON->contains(PREFIX_SCOPE)) {
+
+    const auto& allOccurrences = Utils::findAllOccurrences(*castedPacket.mFormJSON, MainManager::getPrefixScope());
+    if (allOccurrences.empty()) {
         return packet;
     }
 
     ModalFormRequestPacket* newPacket = new ModalFormRequestPacket(castedPacket);
-    newPacket->mFormJSON = Utils::strReplace(*newPacket->mFormJSON, getAllPlaceholders(id));
+    replaceAllPlaceholders(*newPacket->mFormJSON, getAllPlaceholders(id), allOccurrences);
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
@@ -256,6 +265,48 @@ void PlaceholdersManager::replaceDataItemStringValue(
 
     size_t index = std::distance(mData.begin(), it);
     mData[index] = DataItem::create(id, value);
+}
+
+void replaceAllPlaceholders(
+    std::string&                                         value,
+    const std::unordered_map<std::string, std::string>&  placeholders,
+    const std::vector<std::string_view::const_iterator>& allOccurrences
+) {
+    constexpr size_t prefixScopeLength = 16;
+    constexpr size_t separatorLength   = 1;
+    constexpr size_t keyLength         = 16;
+
+    constexpr size_t totalKeyLength = prefixScopeLength + separatorLength + keyLength;
+
+    bool replacedSomething = false;
+    for (const auto& occ : allOccurrences) {
+        size_t pos = static_cast<size_t>(&*occ - &*value.begin());
+        if (pos + totalKeyLength > value.size()) {
+            continue;
+        }
+
+        std::string_view placeholder(&*occ + prefixScopeLength + separatorLength, keyLength);
+
+        auto it = placeholders.find(std::string(placeholder));
+        if (it == placeholders.end()) {
+            continue;
+        }
+
+        std::string_view fullPlaceholder(&*occ, totalKeyLength);
+        std::string      newValue = Utils::strReplace(value, fullPlaceholder, it->second);
+
+        if (newValue != value) {
+            value             = std::move(newValue);
+            replacedSomething = true;
+        }
+    }
+
+    if (replacedSomething) {
+        const auto& newOccurrences = Utils::findAllOccurrences(value, MainManager::getPrefixScope());
+        if (!newOccurrences.empty()) {
+            replaceAllPlaceholders(value, placeholders, newOccurrences);
+        }
+    }
 }
 
 } // namespace translator::manager

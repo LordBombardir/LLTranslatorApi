@@ -1,5 +1,4 @@
 #include "Utils.h"
-#include "../Constants.h"
 #include <algorithm>
 #include <functional>
 
@@ -14,38 +13,44 @@ Utils::strReplace(std::string_view originalStr, std::string_view whatNeedToRepla
     std::string result;
     result.reserve(originalStr.size());
 
-    auto searcher = std::boyer_moore_searcher(whatNeedToReplace.begin(), whatNeedToReplace.end());
+    auto matches = findAllOccurrences(originalStr, whatNeedToReplace);
 
-    auto begin = originalStr.begin();
-    auto end   = originalStr.end();
+    auto it = originalStr.begin();
+    for (auto match : matches) {
+        result.append(it, match);
+        result.append(whatForReplace);
+
+        it = match + whatNeedToReplace.size();
+    }
+
+    result.append(it, originalStr.end());
+    return result;
+}
+
+std::vector<std::string_view::const_iterator>
+Utils::findAllOccurrences(std::string_view haystack, std::string_view needle) {
+    std::vector<std::string_view::const_iterator> matches;
+    if (needle.empty()) {
+        return matches;
+    }
+
+    auto searcher = std::boyer_moore_searcher(needle.begin(), needle.end());
+
+    auto begin = haystack.begin();
+    auto end   = haystack.end();
     auto it    = begin;
 
     while (it != end) {
         auto match = std::search(it, end, searcher);
-        result.append(it, match);
-
         if (match == end) {
             break;
         }
 
-        result.append(whatForReplace);
-        it = match + whatNeedToReplace.size();
+        matches.push_back(match);
+        it = match + needle.size();
     }
 
-    return result;
-}
-
-std::string
-Utils::strReplace(std::string_view originalStr, const std::unordered_map<std::string, std::string>& replacements) {
-    std::string result(originalStr);
-
-    do {
-        for (const auto& [whatNeedToReplace, whatForReplace] : replacements) {
-            std::string updated = Utils::strReplace(result, whatNeedToReplace, whatForReplace);
-        }
-    } while (result.contains(PREFIX_SCOPE)); // todo: изменить PREFIX_SCOPE на секретно-генерируемое уникальное значение.
-
-    return result;
+    return matches;
 }
 
 } // namespace translator
