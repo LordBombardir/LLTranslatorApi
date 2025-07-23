@@ -12,7 +12,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::string>> Ma
 std::unordered_map<std::string, std::unordered_map<std::string, MainManager::TemporaryPlaceholder>>
     MainManager::temporaryPlaceholders = {};
 
-std::mutex MainManager::temporaryPlaceholdersMutex;
+std::recursive_mutex MainManager::temporaryPlaceholdersMutex;
 
 bool MainManager::initManagers(ll::mod::NativeMod& mod) { return ConfigManager::init(mod); }
 
@@ -22,7 +22,7 @@ void MainManager::disposeManagers() {
 }
 
 void MainManager::cleanTemporaryPlaceholders(bool forced) {
-    std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
+    std::lock_guard<std::recursive_mutex> lock(temporaryPlaceholdersMutex);
 
     for (auto& [localeCode, temporaryPlaceholder] : temporaryPlaceholders) {
         for (auto it = temporaryPlaceholder.begin(); it != temporaryPlaceholder.end();) {
@@ -81,7 +81,11 @@ void MainManager::removePlaceholder(const std::string& placeholder, const std::s
 std::unordered_map<std::string, std::string> MainManager::getPlaceholders(const std::string& localeCode) {
     auto it = placeholders.find(localeCode);
     if (it == placeholders.end()) {
-        return {};
+        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
+            return {};
+        }
+
+        return getPlaceholders(ConfigManager::getConfig().defaultLocaleCode);
     }
 
     return it->second;
@@ -92,7 +96,7 @@ void MainManager::setTemporaryPlaceholder(
     const std::string& replaceFor,
     const std::string& localeCode
 ) {
-    std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
+    std::lock_guard<std::recursive_mutex> lock(temporaryPlaceholdersMutex);
 
     MainManager::TemporaryPlaceholder temporaryPlaceholder;
     temporaryPlaceholder.secondsToCleanRemain = timeRemained;
@@ -103,7 +107,7 @@ void MainManager::setTemporaryPlaceholder(
 
 std::optional<std::string>
 MainManager::getTemporaryPlaceholder(const std::string& placeholder, const std::string& localeCode) {
-    std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
+    std::lock_guard<std::recursive_mutex> lock(temporaryPlaceholdersMutex);
 
     auto firstIt = temporaryPlaceholders.find(localeCode);
     if (firstIt == temporaryPlaceholders.end()) {
@@ -124,11 +128,15 @@ MainManager::getTemporaryPlaceholder(const std::string& placeholder, const std::
 }
 
 std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholders(const std::string& localeCode) {
-    std::lock_guard<std::mutex> lock(temporaryPlaceholdersMutex);
+    std::lock_guard<std::recursive_mutex> lock(temporaryPlaceholdersMutex);
 
     auto it = temporaryPlaceholders.find(localeCode);
     if (it == temporaryPlaceholders.end()) {
-        return {};
+        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
+            return {};
+        }
+
+        return getTemporaryPlaceholders(ConfigManager::getConfig().defaultLocaleCode);
     }
 
     std::unordered_map<std::string, std::string> result;

@@ -44,7 +44,7 @@ private:
     };
 
     static std::unordered_map<std::string, std::unordered_map<std::string, TemporaryPlaceholder>> temporaryPlaceholders;
-    static std::mutex temporaryPlaceholdersMutex;
+    static std::recursive_mutex temporaryPlaceholdersMutex;
 
     static std::string generateKey(size_t length);
 };

@@ -16,6 +16,7 @@
 #include <mc/world/actor/DataItem.h>
 #include <mc/world/attribute/AttributeInstanceHandle.h>
 
+
 AvailableCommandsPacket::EnumData::EnumData(const EnumData&)                                     = default;
 AvailableCommandsPacket::SoftEnumData::SoftEnumData(const SoftEnumData&)                         = default;
 AvailableCommandsPacket::ConstrainedValueData::ConstrainedValueData(const ConstrainedValueData&) = default;
@@ -206,20 +207,19 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
     return castedPacket;
 }
 
+// Without cache
 const Packet&
 PlaceholdersManager::processShowModalFormRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
-    const ModalFormRequestPacket& castedPacket = static_cast<const ModalFormRequestPacket&>(packet);
+    ModalFormRequestPacket& castedPacket =
+        const_cast<ModalFormRequestPacket&>(static_cast<const ModalFormRequestPacket&>(packet));
 
     const auto& allOccurrences = Utils::findAllOccurrences(*castedPacket.mFormJSON, MainManager::getPrefixScope());
     if (allOccurrences.empty()) {
         return packet;
     }
 
-    ModalFormRequestPacket* newPacket = new ModalFormRequestPacket(castedPacket);
-    replaceAllPlaceholders(*newPacket->mFormJSON, getAllPlaceholders(id), allOccurrences);
-
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    return *newPacket;
+    replaceAllPlaceholders(*castedPacket.mFormJSON, getAllPlaceholders(id), allOccurrences);
+    return castedPacket;
 }
 
 std::string PlaceholdersManager::getPlayerLocaleCode(const NetworkIdentifier& id) {
