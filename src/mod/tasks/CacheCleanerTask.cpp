@@ -16,7 +16,7 @@ bool CacheCleanerTask::init() {
     }
 
     function = []() -> void {
-        manager::PlaceholdersManager::cleanPacketsCache();
+        manager::PlaceholdersManager::cleanPackets();
         manager::MainManager::cleanTemporaryPlaceholders();
     };
 

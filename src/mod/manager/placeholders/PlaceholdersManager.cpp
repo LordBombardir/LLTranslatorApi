@@ -52,7 +52,15 @@ static constexpr short timeRemained = 60;
 std::unordered_map<const Packet*, PlaceholdersManager::CachedPacket> PlaceholdersManager::cachedPackets = {};
 std::mutex                                                           PlaceholdersManager::cachedPacketsMutex;
 
-void PlaceholdersManager::cleanPacketsCache(bool forced) {
+std::vector<PlaceholdersManager::TemporaryPacket> PlaceholdersManager::temporaryPackets = {};
+std::mutex                                        PlaceholdersManager::temporaryPacketsMutex;
+
+void PlaceholdersManager::cleanPackets(bool forced) {
+    cleanCachedPackets(forced);
+    cleanTemporaryPackets(forced);
+}
+
+void PlaceholdersManager::cleanCachedPackets(bool forced) {
     std::lock_guard<std::mutex> lock(cachedPacketsMutex);
 
     for (auto it = cachedPackets.begin(); it != cachedPackets.end();) {
@@ -63,6 +71,17 @@ void PlaceholdersManager::cleanPacketsCache(bool forced) {
 
             it->second.packets.clear();
             it = cachedPackets.erase(it);
+        }
+    }
+}
+
+void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
+    std::lock_guard<std::mutex> lock(temporaryPacketsMutex);
+
+    for (auto it = temporaryPackets.begin(); it != temporaryPackets.end();) {
+        if (--it->secondsToCleanRemain <= 0 || forced) {
+            delete it->packet;
+            it = temporaryPackets.erase(it);
         }
     }
 }
@@ -136,6 +155,11 @@ const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket,
     return secondIt->second;
 }
 
+void PlaceholdersManager::addTemporaryPacket(const Packet* packet) {
+    std::lock_guard<std::mutex> lock(temporaryPacketsMutex);
+    temporaryPackets.emplace_back(timeRemained, packet);
+}
+
 // Without cache
 const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkIdentifier& id, const Packet& packet) {
     AvailableCommandsPacket& castedPacket =
@@ -184,7 +208,7 @@ const Packet& PlaceholdersManager::processSetTitlePacket(const NetworkIdentifier
 const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
     const ToastRequestPacket& castedPacket = static_cast<const ToastRequestPacket&>(packet);
 
-    const auto& firstAllOccurrences = Utils::findAllOccurrences(*castedPacket.mTitle, MainManager::getPrefixScope());
+    const auto& firstAllOccurrences  = Utils::findAllOccurrences(*castedPacket.mTitle, MainManager::getPrefixScope());
     const auto& secondAllOccurrences = Utils::findAllOccurrences(*castedPacket.mContent, MainManager::getPrefixScope());
 
     if (firstAllOccurrences.empty() && secondAllOccurrences.empty()) {
@@ -285,6 +309,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
     return *newPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdentifier& id, const Packet& packet) {
     const SetActorDataPacket& castedPacket = static_cast<const SetActorDataPacket&>(packet);
 
@@ -311,7 +336,7 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
         replaceDataItemStringValue(newPacket->mPackedItems, dataItem->getId(), data);
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 

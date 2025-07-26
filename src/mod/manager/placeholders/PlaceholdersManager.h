@@ -9,7 +9,7 @@ namespace translator::manager {
 
 class PlaceholdersManager final {
 public:
-    static void cleanPacketsCache(bool forced = false);
+    static void cleanPackets(bool forced = false);
 
     static const Packet& processPacket(const NetworkIdentifier& id, const Packet& packet);
 
@@ -22,8 +22,21 @@ private:
     static std::unordered_map<const Packet*, CachedPacket> cachedPackets;
     static std::mutex                                      cachedPacketsMutex;
 
+    struct TemporaryPacket {
+        short         secondsToCleanRemain;
+        const Packet* packet;
+    };
+
+    static std::vector<TemporaryPacket> temporaryPackets;
+    static std::mutex                   temporaryPacketsMutex;
+
+    static void cleanCachedPackets(bool forced);
+    static void cleanTemporaryPackets(bool forced);
+
     static void addCachedPacket(const Packet* originalPacket, const Packet* packet, const std::string& localeCode);
     static const Packet* getCachedPacket(const Packet* originalPacket, const std::string& localeCode);
+
+    static void addTemporaryPacket(const Packet* packet);
 
     static const Packet& processAvailableCommandsPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processTextPacket(const NetworkIdentifier& id, const Packet& packet);

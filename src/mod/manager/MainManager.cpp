@@ -17,7 +17,7 @@ std::recursive_mutex MainManager::temporaryPlaceholdersMutex;
 bool MainManager::initManagers(ll::mod::NativeMod& mod) { return ConfigManager::init(mod); }
 
 void MainManager::disposeManagers() {
-    PlaceholdersManager::cleanPacketsCache(true);
+    PlaceholdersManager::cleanPackets(true);
     cleanTemporaryPlaceholders(true);
 }
 
