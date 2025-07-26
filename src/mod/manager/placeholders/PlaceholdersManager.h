@@ -27,6 +27,7 @@ private:
 
     static const Packet& processAvailableCommandsPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processTextPacket(const NetworkIdentifier& id, const Packet& packet);
+    static const Packet& processSetTitlePacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processAddActorPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processAddPlayerPacket(const NetworkIdentifier& id, const Packet& packet);
     static const Packet& processSetActorDataPacket(const NetworkIdentifier& id, const Packet& packet);

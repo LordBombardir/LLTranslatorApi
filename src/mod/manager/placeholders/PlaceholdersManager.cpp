@@ -12,6 +12,7 @@
 #include <mc/network/packet/AvailableCommandsPacket.h>
 #include <mc/network/packet/ModalFormRequestPacket.h>
 #include <mc/network/packet/SetActorDataPacket.h>
+#include <mc/network/packet/SetTitlePacket.h>
 #include <mc/network/packet/SyncedAttribute.h>
 #include <mc/network/packet/TextPacket.h>
 #include <mc/world/actor/ActorLink.h>
@@ -77,7 +78,7 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
     case MinecraftPacketIds::Text:
         return processTextPacket(id, packet);
     case MinecraftPacketIds::SetTitle:
-        return packet;
+        return processSetTitlePacket(id, packet);
     case MinecraftPacketIds::AddActor:
         return processAddActorPacket(id, packet);
     case MinecraftPacketIds::AddPlayer:
@@ -151,6 +152,21 @@ const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id
 
     TextPacket* newPacket = new TextPacket(castedPacket);
     replaceAllPlaceholders(newPacket->mMessage, getAllPlaceholders(id), allOccurrences);
+
+    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    return *newPacket;
+}
+
+const Packet& PlaceholdersManager::processSetTitlePacket(const NetworkIdentifier& id, const Packet& packet) {
+    const SetTitlePacket& castedPacket = static_cast<const SetTitlePacket&>(packet);
+
+    const auto& allOccurrences = Utils::findAllOccurrences(*castedPacket.mTitleText, MainManager::getPrefixScope());
+    if (allOccurrences.empty()) {
+        return packet;
+    }
+
+    SetTitlePacket* newPacket = new SetTitlePacket(castedPacket);
+    replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id), allOccurrences);
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
