@@ -36,6 +36,8 @@ private:
 
     static std::unordered_map<std::string, std::string> getAllPlaceholders(const NetworkIdentifier& id);
 
+    static std::vector<std::unique_ptr<DataItem>> cloneDataItems(const std::vector<std::unique_ptr<DataItem>>& source);
+
     static void
     replaceDataItemStringValue(std::vector<std::unique_ptr<DataItem>>& mData, ushort id, const std::string& value);
     static void replaceAllPlaceholders(
