@@ -244,6 +244,7 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
     newPacket->mMap               = castedPacket.mMap;
     newPacket->mEntityData        = castedPacket.mEntityData;
 
+    bool replacedSomething = false;
     for (auto& dataItem : *newPacket->mData) {
         DataItemType type = dataItem->getType();
         if (type != DataItemType::String) {
@@ -259,6 +260,13 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
 
         replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(*newPacket->mData, dataItem->getId(), data);
+
+        replacedSomething = true;
+    }
+
+    if (!replacedSomething) {
+        delete newPacket;
+        return packet;
     }
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
@@ -288,6 +296,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
     newPacket->mEntityData        = nullptr;
     newPacket->mSynchedProperties = castedPacket.mSynchedProperties;
 
+    bool replacedSomething = false;
     for (auto& dataItem : *newPacket->mUnpack) {
         DataItemType type = dataItem->getType();
         if (type != DataItemType::String) {
@@ -303,6 +312,13 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
 
         replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(*newPacket->mUnpack, dataItem->getId(), data);
+
+        replacedSomething = true;
+    }
+
+    if (!replacedSomething) {
+        delete newPacket;
+        return packet;
     }
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
@@ -319,6 +335,7 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
     newPacket->mSynchedProperties = castedPacket.mSynchedProperties;
     newPacket->mTick              = castedPacket.mTick;
 
+    bool replacedSomething = false;
     for (auto& dataItem : newPacket->mPackedItems) {
         DataItemType type = dataItem->getType();
         if (type != DataItemType::String) {
@@ -334,6 +351,13 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
 
         replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
         replaceDataItemStringValue(newPacket->mPackedItems, dataItem->getId(), data);
+
+        replacedSomething = true;
+    }
+
+    if (!replacedSomething) {
+        delete newPacket;
+        return packet;
     }
 
     addTemporaryPacket(newPacket);
