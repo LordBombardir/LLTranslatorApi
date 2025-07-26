@@ -15,6 +15,7 @@
 #include <mc/network/packet/SetTitlePacket.h>
 #include <mc/network/packet/SyncedAttribute.h>
 #include <mc/network/packet/TextPacket.h>
+#include <mc/network/packet/ToastRequestPacket.h>
 #include <mc/world/actor/ActorLink.h>
 #include <mc/world/actor/DataItem.h>
 #include <mc/world/actor/SynchedActorDataEntityWrapper.h>
@@ -79,6 +80,8 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
         return processTextPacket(id, packet);
     case MinecraftPacketIds::SetTitle:
         return processSetTitlePacket(id, packet);
+    case MinecraftPacketIds::ToastRequest:
+        return processToastRequestPacket(id, packet);
     case MinecraftPacketIds::AddActor:
         return processAddActorPacket(id, packet);
     case MinecraftPacketIds::AddPlayer:
@@ -167,6 +170,25 @@ const Packet& PlaceholdersManager::processSetTitlePacket(const NetworkIdentifier
 
     SetTitlePacket* newPacket = new SetTitlePacket(castedPacket);
     replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id), allOccurrences);
+
+    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    return *newPacket;
+}
+
+const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
+    const ToastRequestPacket& castedPacket = static_cast<const ToastRequestPacket&>(packet);
+
+    const auto& firstAllOccurrences = Utils::findAllOccurrences(*castedPacket.mTitle, MainManager::getPrefixScope());
+    const auto& secondAllOccurrences = Utils::findAllOccurrences(*castedPacket.mContent, MainManager::getPrefixScope());
+
+    if (firstAllOccurrences.empty() && secondAllOccurrences.empty()) {
+        return packet;
+    }
+
+    ToastRequestPacket* newPacket = new ToastRequestPacket(castedPacket);
+
+    replaceAllPlaceholders(*newPacket->mTitle, getAllPlaceholders(id), firstAllOccurrences);
+    replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id), secondAllOccurrences);
 
     addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
