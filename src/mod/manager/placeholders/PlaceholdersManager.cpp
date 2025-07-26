@@ -103,6 +103,12 @@ void PlaceholdersManager::addCachedPacket(
     std::lock_guard<std::mutex> lock(cachedPacketsMutex);
 
     PlaceholdersManager::CachedPacket cachedPacket;
+
+    auto it = cachedPackets.find(originalPacket);
+    if (it != cachedPackets.end()) {
+        cachedPacket = std::move(it->second);
+    }
+
     cachedPacket.secondsToCleanRemain = timeRemained;
     cachedPacket.packets[localeCode]  = packet;
 
