@@ -79,16 +79,12 @@ void MainManager::removePlaceholder(const std::string& placeholder, const std::s
 }
 
 std::unordered_map<std::string, std::string> MainManager::getPlaceholders(const std::string& localeCode) {
-    auto it = placeholders.find(localeCode);
-    if (it == placeholders.end()) {
-        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
-            return {};
-        }
-
-        return getPlaceholders(ConfigManager::getConfig().defaultLocaleCode);
-    }
-
-    return it->second;
+    return mergeLocaleMaps(
+        placeholders,
+        ConfigManager::getConfig().defaultLocaleCode,
+        localeCode,
+        [](const std::string& v) -> const std::string& { return v; }
+    );
 }
 
 void MainManager::setTemporaryPlaceholder(
@@ -130,21 +126,12 @@ MainManager::getTemporaryPlaceholder(const std::string& placeholder, const std::
 std::unordered_map<std::string, std::string> MainManager::getTemporaryPlaceholders(const std::string& localeCode) {
     std::lock_guard<std::recursive_mutex> lock(temporaryPlaceholdersMutex);
 
-    auto it = temporaryPlaceholders.find(localeCode);
-    if (it == temporaryPlaceholders.end()) {
-        if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
-            return {};
-        }
-
-        return getTemporaryPlaceholders(ConfigManager::getConfig().defaultLocaleCode);
-    }
-
-    std::unordered_map<std::string, std::string> result;
-    for (auto& [placeholder, temporaryPlaceholder] : it->second) {
-        result[placeholder] = temporaryPlaceholder.replaceFor;
-    }
-
-    return result;
+    return mergeLocaleMaps(
+        temporaryPlaceholders,
+        ConfigManager::getConfig().defaultLocaleCode,
+        localeCode,
+        [](const TemporaryPlaceholder& v) -> const std::string& { return v.replaceFor; }
+    );
 }
 
 std::string MainManager::generateKey(size_t length) {
