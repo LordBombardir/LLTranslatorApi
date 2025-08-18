@@ -160,7 +160,7 @@ void PlaceholdersManager::addTemporaryPacket(const Packet* packet) {
     temporaryPackets.emplace_back(timeRemained, packet);
 }
 
-// Without cache
+// Without cache (const_cast)
 const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkIdentifier& id, const Packet& packet) {
     AvailableCommandsPacket& castedPacket =
         const_cast<AvailableCommandsPacket&>(static_cast<const AvailableCommandsPacket&>(packet));
@@ -175,6 +175,7 @@ const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkI
     return castedPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id, const Packet& packet) {
     const TextPacket& castedPacket = static_cast<const TextPacket&>(packet);
 
@@ -186,7 +187,7 @@ const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id
     TextPacket* newPacket = new TextPacket(castedPacket);
     replaceAllPlaceholders(newPacket->mMessage, getAllPlaceholders(id), allOccurrences);
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
@@ -364,7 +365,7 @@ const Packet& PlaceholdersManager::processSetActorDataPacket(const NetworkIdenti
     return *newPacket;
 }
 
-// Without cache
+// Without cache (const_cast)
 const Packet&
 PlaceholdersManager::processShowModalFormRequestPacket(const NetworkIdentifier& id, const Packet& packet) {
     ModalFormRequestPacket& castedPacket =
