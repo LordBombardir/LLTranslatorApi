@@ -413,71 +413,13 @@ std::unordered_map<std::string, std::string> PlaceholdersManager::getAllPlacehol
 std::vector<std::unique_ptr<DataItem>>
 PlaceholdersManager::cloneDataItems(const std::vector<std::unique_ptr<DataItem>>& source) {
     std::vector<std::unique_ptr<DataItem>> result;
+    result.reserve(source.size());
 
     for (const auto& item : source) {
-        if (!item) {
-            continue;
-        }
-
-        ushort id = item->getId();
-
-        switch (item->getType()) {
-        case DataItemType::Byte: {
-            if (auto value = item->getData<schar>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Short: {
-            if (auto value = item->getData<short>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Int: {
-            if (auto value = item->getData<int>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Float: {
-            if (auto value = item->getData<float>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::String: {
-            if (auto value = item->getData<std::string>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::CompoundTag: {
-            if (auto value = item->getData<CompoundTag>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Pos: {
-            if (auto value = item->getData<BlockPos>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Int64: {
-            if (auto value = item->getData<int64>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        case DataItemType::Vec3: {
-            if (auto value = item->getData<Vec3>()) {
-                result.push_back(DataItem::create(id, *value));
-            }
-            break;
-        }
-        default:
-            break;
+        if (item) {
+            result.push_back(item->clone());
+        } else {
+            result.push_back(DataItem::create(ActorDataIDs::Reserved0, 0));
         }
     }
 
@@ -498,7 +440,7 @@ void PlaceholdersManager::replaceDataItemStringValue(
     }
 
     size_t index = std::distance(mData.begin(), it);
-    mData[index] = DataItem::create(id, value);
+    static_cast<DataItem2<std::string>&>(*mData[index]).mValue = value;
 }
 
 void PlaceholdersManager::replaceAllPlaceholders(
