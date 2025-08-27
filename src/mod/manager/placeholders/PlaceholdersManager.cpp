@@ -86,6 +86,7 @@ void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
     }
 }
 
+// NOT Resolved https://github.com/LordBombardir/LLTranslatorApi/issues/2
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
     auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
     if (cachedPacket != nullptr) {
@@ -102,11 +103,11 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
     case MinecraftPacketIds::ToastRequest:
         return processToastRequestPacket(id, packet);
     case MinecraftPacketIds::AddActor:
-        return processAddActorPacket(id, packet);
+        return packet; // processAddActorPacket(id, packet);
     case MinecraftPacketIds::AddPlayer:
-        return processAddPlayerPacket(id, packet);
+        return packet; // processAddPlayerPacket(id, packet);
     case MinecraftPacketIds::SetActorData:
-        return processSetActorDataPacket(id, packet);
+        return packet; // processSetActorDataPacket(id, packet);
     case MinecraftPacketIds::ShowModalForm:
         return processShowModalFormRequestPacket(id, packet);
     default:
@@ -439,7 +440,7 @@ void PlaceholdersManager::replaceDataItemStringValue(
         return;
     }
 
-    size_t index = std::distance(mData.begin(), it);
+    size_t index                                               = std::distance(mData.begin(), it);
     static_cast<DataItem2<std::string>&>(*mData[index]).mValue = value;
 }
 
