@@ -87,10 +87,10 @@ void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
 }
 
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
-    auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
-    if (cachedPacket != nullptr) {
-        return *cachedPacket;
-    }
+    //auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
+    //if (cachedPacket != nullptr) {
+    //    return *cachedPacket;
+    //}
 
     switch (packet.getId()) {
     case MinecraftPacketIds::AvailableCommands:
