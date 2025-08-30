@@ -226,6 +226,7 @@ const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdenti
     return *newPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier& id, const Packet& packet) {
     const AddActorPacket& castedPacket = static_cast<const AddActorPacket&>(packet);
 
@@ -271,10 +272,11 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
         return packet;
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifier& id, const Packet& packet) {
     const AddPlayerPacket& castedPacket = static_cast<const AddPlayerPacket&>(packet);
 
@@ -323,7 +325,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
         return packet;
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
