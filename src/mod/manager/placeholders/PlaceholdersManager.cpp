@@ -56,8 +56,7 @@ std::vector<PlaceholdersManager::TemporaryPacket> PlaceholdersManager::temporary
 std::mutex                                        PlaceholdersManager::temporaryPacketsMutex;
 
 void PlaceholdersManager::cleanPackets(bool forced) {
-    // See https://github.com/LordBombardir/LLTranslatorApi/issues/2
-    //cleanCachedPackets(forced);
+    cleanCachedPackets(forced);
     cleanTemporaryPackets(forced);
 }
 
@@ -88,11 +87,10 @@ void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
 }
 
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
-    // See https://github.com/LordBombardir/LLTranslatorApi/issues/2
-    //auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
-    //if (cachedPacket != nullptr) {
-    //    return *cachedPacket;
-    //}
+    auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
+    if (cachedPacket != nullptr) {
+        return *cachedPacket;
+    }
 
     switch (packet.getId()) {
     case MinecraftPacketIds::AvailableCommands:
@@ -204,8 +202,7 @@ const Packet& PlaceholdersManager::processSetTitlePacket(const NetworkIdentifier
     SetTitlePacket* newPacket = new SetTitlePacket(castedPacket);
     replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id), allOccurrences);
 
-    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    addTemporaryPacket(newPacket);
+    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
 }
 
@@ -224,11 +221,11 @@ const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdenti
     replaceAllPlaceholders(*newPacket->mTitle, getAllPlaceholders(id), firstAllOccurrences);
     replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id), secondAllOccurrences);
 
-    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    addTemporaryPacket(newPacket);
+    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier& id, const Packet& packet) {
     const AddActorPacket& castedPacket = static_cast<const AddActorPacket&>(packet);
 
@@ -274,11 +271,11 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
         return packet;
     }
 
-    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
+// Without cache
 const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifier& id, const Packet& packet) {
     const AddPlayerPacket& castedPacket = static_cast<const AddPlayerPacket&>(packet);
 
@@ -327,7 +324,6 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
         return packet;
     }
 
-    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     addTemporaryPacket(newPacket);
     return *newPacket;
 }
