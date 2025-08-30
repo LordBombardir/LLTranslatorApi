@@ -56,7 +56,8 @@ std::vector<PlaceholdersManager::TemporaryPacket> PlaceholdersManager::temporary
 std::mutex                                        PlaceholdersManager::temporaryPacketsMutex;
 
 void PlaceholdersManager::cleanPackets(bool forced) {
-    cleanCachedPackets(forced);
+    // See https://github.com/LordBombardir/LLTranslatorApi/issues/2
+    //cleanCachedPackets(forced);
     cleanTemporaryPackets(forced);
 }
 
@@ -87,6 +88,7 @@ void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
 }
 
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
+    // See https://github.com/LordBombardir/LLTranslatorApi/issues/2
     //auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
     //if (cachedPacket != nullptr) {
     //    return *cachedPacket;
@@ -202,7 +204,8 @@ const Packet& PlaceholdersManager::processSetTitlePacket(const NetworkIdentifier
     SetTitlePacket* newPacket = new SetTitlePacket(castedPacket);
     replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id), allOccurrences);
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
@@ -221,7 +224,8 @@ const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdenti
     replaceAllPlaceholders(*newPacket->mTitle, getAllPlaceholders(id), firstAllOccurrences);
     replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id), secondAllOccurrences);
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemproraryPacket(newPacket);
     return *newPacket;
 }
 
@@ -270,7 +274,8 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
         return packet;
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemproraryPacket(newPacket);
     return *newPacket;
 }
 
@@ -322,7 +327,8 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
         return packet;
     }
 
-    addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
+    addTemproraryPacket(newPacket);
     return *newPacket;
 }
 
