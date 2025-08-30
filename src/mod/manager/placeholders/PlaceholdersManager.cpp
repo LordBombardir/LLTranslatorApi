@@ -86,7 +86,6 @@ void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
     }
 }
 
-// NOT Resolved https://github.com/LordBombardir/LLTranslatorApi/issues/2
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
     auto cachedPacket = getCachedPacket(&packet, getPlayerLocaleCode(id));
     if (cachedPacket != nullptr) {
@@ -103,11 +102,11 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
     case MinecraftPacketIds::ToastRequest:
         return processToastRequestPacket(id, packet);
     case MinecraftPacketIds::AddActor:
-        return packet; // processAddActorPacket(id, packet);
+        return processAddActorPacket(id, packet);
     case MinecraftPacketIds::AddPlayer:
-        return packet; // processAddPlayerPacket(id, packet);
+        return processAddPlayerPacket(id, packet);
     case MinecraftPacketIds::SetActorData:
-        return packet; // processSetActorDataPacket(id, packet);
+        return processSetActorDataPacket(id, packet);
     case MinecraftPacketIds::ShowModalForm:
         return processShowModalFormRequestPacket(id, packet);
     default:
