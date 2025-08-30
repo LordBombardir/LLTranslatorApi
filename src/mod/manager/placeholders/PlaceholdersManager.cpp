@@ -225,7 +225,7 @@ const Packet& PlaceholdersManager::processToastRequestPacket(const NetworkIdenti
     replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id), secondAllOccurrences);
 
     //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    addTemproraryPacket(newPacket);
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
@@ -275,7 +275,7 @@ const Packet& PlaceholdersManager::processAddActorPacket(const NetworkIdentifier
     }
 
     //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    addTemproraryPacket(newPacket);
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
@@ -328,7 +328,7 @@ const Packet& PlaceholdersManager::processAddPlayerPacket(const NetworkIdentifie
     }
 
     //addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
-    addTemproraryPacket(newPacket);
+    addTemporaryPacket(newPacket);
     return *newPacket;
 }
 
