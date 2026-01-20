@@ -30,10 +30,10 @@ jobs:
           xmake repo -u
 
       - run: |
-          xmake f -a x64 -m release -p windows --target_type=${{ matrix.target_type }} -y
+          xmake f -a x64 -m release -p windows -v --target_type=${{ matrix.target_type }} -y
 
       - run: |
-          xmake -w -y
+          xmake -v -y
 
       - uses: actions/upload-artifact@v6
         with:
@@ -55,6 +55,9 @@ jobs:
         with:
           body: |
             ${{ steps.extract-release-notes.outputs.release_notes }}
+
+            | File | SHA256 |
+            | ---- | ------ |
 
   upload-to-release:
     needs:
@@ -83,7 +86,15 @@ jobs:
           zip -r ../${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip *
         working-directory: artifact
 
+      - name: Calculate SHA256
+        id: calculate-sha256
+        run: |
+          echo release=$(sha256sum ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip | awk '{print $1}') >> $GITHUB_OUTPUT
+
       - uses: softprops/action-gh-release@v2
         with:
+          append_body: true
+          body: |-
+            | ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip | ${{ steps.calculate-sha256.outputs.release }} |
           files: |
             ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip
