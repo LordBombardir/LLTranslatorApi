@@ -21,10 +21,14 @@
 #include <mc/world/actor/SynchedActorDataEntityWrapper.h>
 #include <mc/world/attribute/AttributeInstanceHandle.h>
 
-AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
+AvailableCommandsPacket::OverloadData::OverloadData(const AvailableCommandsPacket::OverloadData&) = default;
+AvailableCommandsPacket::CommandData::CommandData(const CommandData&)                             = default;
 
 PropertySyncData& PropertySyncData::operator=(const PropertySyncData&) = default;
 PropertySyncData::PropertySyncData()                                   = default;
+
+SyncedAttribute::SyncedAttribute(const SyncedAttribute&)            = default;
+SyncedAttribute& SyncedAttribute::operator=(const SyncedAttribute&) = default;
 
 SetTitlePacketPayload::SetTitlePacketPayload()                             = default;
 SetTitlePacketPayload::SetTitlePacketPayload(const SetTitlePacketPayload&) = default;
