@@ -21,6 +21,8 @@
 #include <mc/world/actor/SynchedActorDataEntityWrapper.h>
 #include <mc/world/attribute/AttributeInstanceHandle.h>
 
+AvailableCommandsPacket::ParamData::ParamData(const AvailableCommandsPacket::ParamData&)          = default;
+
 AvailableCommandsPacket::OverloadData::OverloadData(const AvailableCommandsPacket::OverloadData&) = default;
 AvailableCommandsPacket::CommandData::CommandData(const CommandData&)                             = default;
 
