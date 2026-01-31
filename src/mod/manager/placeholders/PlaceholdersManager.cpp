@@ -21,16 +21,12 @@
 #include <mc/world/actor/SynchedActorDataEntityWrapper.h>
 #include <mc/world/attribute/AttributeInstanceHandle.h>
 
-AvailableCommandsPacket::ParamData::ParamData(const AvailableCommandsPacket::ParamData&)          = default;
+AvailableCommandsPacket::ParamData::ParamData(const AvailableCommandsPacket::ParamData&) = default;
 
-AvailableCommandsPacket::OverloadData::OverloadData(const AvailableCommandsPacket::OverloadData&) = default;
-AvailableCommandsPacket::CommandData::CommandData(const CommandData&)                             = default;
+AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
 
 PropertySyncData& PropertySyncData::operator=(const PropertySyncData&) = default;
 PropertySyncData::PropertySyncData()                                   = default;
-
-SyncedAttribute::SyncedAttribute(const SyncedAttribute&)            = default;
-SyncedAttribute& SyncedAttribute::operator=(const SyncedAttribute&) = default;
 
 SetTitlePacketPayload::SetTitlePacketPayload()                             = default;
 SetTitlePacketPayload::SetTitlePacketPayload(const SetTitlePacketPayload&) = default;
@@ -174,13 +170,18 @@ const Packet& PlaceholdersManager::processAvailableCommandsPacket(const NetworkI
 const Packet& PlaceholdersManager::processTextPacket(const NetworkIdentifier& id, const Packet& packet) {
     const TextPacket& castedPacket = static_cast<const TextPacket&>(packet);
 
-    const auto& allOccurrences = Utils::findAllOccurrences(castedPacket.mMessage, MainManager::getPrefixScope());
+    const auto& allOccurrences = Utils::findAllOccurrences(castedPacket.getMessage(), MainManager::getPrefixScope());
     if (allOccurrences.empty()) {
         return packet;
     }
 
     TextPacket* newPacket = new TextPacket(castedPacket);
-    replaceAllPlaceholders(newPacket->mMessage, getAllPlaceholders(id), allOccurrences);
+    std::visit(
+        [&](auto& payload) -> void {
+            replaceAllPlaceholders(payload.mMessage, getAllPlaceholders(id), allOccurrences);
+        },
+        *newPacket->mBody
+    );
 
     addTemporaryPacket(newPacket);
     return *newPacket;
