@@ -96,7 +96,7 @@ jobs:
         run: |
           echo "| ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip | ${{ steps.calculate-sha256.outputs.release }} |" > sha-row.txt
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v6
         with:
           name: sha-row-${{ matrix.target_type }}
           path: sha-row.txt
