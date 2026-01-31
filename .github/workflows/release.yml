@@ -63,9 +63,6 @@ jobs:
           body: |
             ${{ steps.extract-release-notes.outputs.release_notes }}
 
-            | File | SHA256 |
-            | ---- | ------ |
-
   upload-to-release:
     needs:
       - build
@@ -135,6 +132,8 @@ jobs:
 
           {
             echo "rows<<EOF"
+            echo "| File | SHA256 |"
+            echo "| ---- | ------ |"
             cat table_rows.txt
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
