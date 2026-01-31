@@ -131,7 +131,7 @@ jobs:
 
       - id: collect-sha-rows
         run: |
-          find rows -name "sha-row.txt" -print -exec cat {} \; > table_rows.txt
+          find rows -name "sha-row.txt" -exec cat {} \; > table_rows.txt
 
           {
             echo "rows<<EOF"
