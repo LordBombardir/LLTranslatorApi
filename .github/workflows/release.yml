@@ -7,12 +7,15 @@ jobs:
   build:
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         target_type:
           - server
           - client
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: xmake-io/github-action-setup-xmake@v1
         # with:
@@ -37,7 +40,7 @@ jobs:
 
       - uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-windows-x64
+          name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64
           path: |
             bin/
 
@@ -77,29 +80,35 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-windows-x64
+          name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64
           path: artifact
 
       - run: |
           cp CHANGELOG.md LICENSE README.md artifact/
 
       - run: |
-          zip -r ../${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip *
+          zip -r ../${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64.zip *
         working-directory: artifact
 
       - name: Calculate SHA256
         id: calculate-sha256
         run: |
-          echo release=$(sha256sum ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip | awk '{print $1}') >> $GITHUB_OUTPUT
+          echo release=$(sha256sum ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64.zip | awk '{print $1}') >> $GITHUB_OUTPUT
 
       - name: Prepare SHA row
         run: |
-          echo "| ${{ github.event.repository.name }}-${{ matrix.target_type }}-windows-x64.zip | ${{ steps.calculate-sha256.outputs.release }} |" > sha-row.txt
+          echo "| ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64.zip | ${{ steps.calculate-sha256.outputs.release }} |" > sha-row.txt
 
       - uses: actions/upload-artifact@v6
         with:
-          name: sha-row-${{ matrix.target_type }}
+          name: sha-row-${{ matrix.target_type }}-${{ matrix.mode }}
           path: sha-row.txt
+      
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64.zip
     
   finalize-release-body:
     needs: upload-to-release
@@ -117,14 +126,12 @@ jobs:
       - id: collect-sha-rows
         run: |
           find rows -name "sha-row.txt" -print -exec cat {} \; > table_rows.txt
-
-          {
-            echo "rows<<EOF"
-            cat table_rows.txt
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          echo "rows<<'EOF'" >> $GITHUB_OUTPUT
+          cat table_rows.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - uses: softprops/action-gh-release@v2
         with:
           append_body: true
+          tag_name: ${{ github.event.release.tag_name }}
           body: ${{ steps.collect-sha-rows.outputs.rows }}
