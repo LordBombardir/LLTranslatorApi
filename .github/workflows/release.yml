@@ -12,6 +12,9 @@ jobs:
         target_type:
           - server
           - client
+        mode:
+          - debug
+          - release
     steps:
       - uses: actions/checkout@v6
         with:
@@ -126,9 +129,12 @@ jobs:
       - id: collect-sha-rows
         run: |
           find rows -name "sha-row.txt" -print -exec cat {} \; > table_rows.txt
-          echo "rows<<'EOF'" >> $GITHUB_OUTPUT
-          cat table_rows.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+
+          {
+            echo "rows<<EOF"
+            cat table_rows.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - uses: softprops/action-gh-release@v2
         with:
