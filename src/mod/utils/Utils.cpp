@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace translator {
+namespace placeholder {
 
 std::string
 Utils::strReplace(std::string_view originalStr, std::string_view whatNeedToReplace, std::string_view whatForReplace) {
@@ -54,4 +54,4 @@ std::vector<size_t> Utils::findAllOccurrences(std::string_view haystack, std::st
     return matches;
 }
 
-} // namespace translator
+} // namespace placeholder

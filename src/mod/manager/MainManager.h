@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 class MainManager final {
 public:
@@ -77,4 +77,4 @@ private:
     }
 };
 
-} // namespace translator::manager
+} // namespace placeholder::manager

@@ -2,7 +2,7 @@
 
 #include <ll/api/mod/NativeMod.h>
 
-namespace translator {
+namespace placeholder {
 
 class Main {
 public:
@@ -20,4 +20,4 @@ private:
     ll::mod::NativeMod& mSelf;
 };
 
-} // namespace translator
+} // namespace placeholder

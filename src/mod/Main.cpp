@@ -4,7 +4,7 @@
 #include "tasks/CacheCleanerTask.h"
 #include <ll/api/mod/RegisterHelper.h>
 
-namespace translator {
+namespace placeholder {
 
 Main& Main::getInstance() {
     static Main instance;
@@ -48,6 +48,6 @@ bool Main::disable() {
     return true;
 }
 
-} // namespace translator
+} // namespace placeholder
 
-LL_REGISTER_MOD(translator::Main, translator::Main::getInstance());
+LL_REGISTER_MOD(placeholder::Main, placeholder::Main::getInstance());

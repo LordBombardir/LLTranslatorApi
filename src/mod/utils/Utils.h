@@ -4,7 +4,7 @@
 #include <string_view>
 #include <vector>
 
-namespace translator {
+namespace placeholder {
 
 class Utils final {
 public:
@@ -14,4 +14,4 @@ public:
     static std::vector<size_t> findAllOccurrences(std::string_view haystack, std::string_view needle);
 };
 
-} // namespace translator
+} // namespace placeholder

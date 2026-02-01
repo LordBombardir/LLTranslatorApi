@@ -36,7 +36,7 @@ ToastRequestPacketPayload::ToastRequestPacketPayload(const ToastRequestPacketPay
 
 SetActorDataPacket::SetActorDataPacket() = default;
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 static constexpr short timeRemained = 60;
 
@@ -480,4 +480,4 @@ void PlaceholdersManager::replaceAllPlaceholders(
     }
 }
 
-} // namespace translator::manager
+} // namespace placeholder::manager

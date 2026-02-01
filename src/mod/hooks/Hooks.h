@@ -1,7 +1,7 @@
 #pragma once
 
-namespace translator::hooks {
+namespace placeholder::hooks {
 
 void setupHooks();
 
-} // namespace translator::hooks
+} // namespace placeholder::hooks

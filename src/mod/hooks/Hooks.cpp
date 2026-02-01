@@ -6,7 +6,7 @@
 #include <mc/network/NetworkIdentifierWithSubId.h>
 #include <mc/network/NetworkSystem.h>
 
-namespace translator::hooks {
+namespace placeholder::hooks {
 
 LL_STATIC_HOOK(
     LeviLaminaDefaultLocaleCodeHook,
@@ -53,4 +53,4 @@ void setupHooks() {
     NetworkSystemSendHook::hook();
 }
 
-} // namespace translator::hooks
+} // namespace placeholder::hooks

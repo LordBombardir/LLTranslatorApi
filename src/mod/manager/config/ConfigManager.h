@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 class ConfigManager final {
 public:
@@ -21,4 +21,4 @@ private:
     static MainConfig config;
 };
 
-} // namespace translator::manager
+} // namespace placeholder::manager

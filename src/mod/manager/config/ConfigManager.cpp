@@ -1,7 +1,7 @@
 #include "ConfigManager.h"
 #include <ll/api/Config.h>
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 ConfigManager::MainConfig ConfigManager::config;
 
@@ -21,4 +21,4 @@ bool ConfigManager::init(ll::mod::NativeMod& mod) {
 
 const ConfigManager::MainConfig& ConfigManager::getConfig() { return config; }
 
-} // namespace translator::manager
+} // namespace placeholder::manager

@@ -4,7 +4,7 @@
 #include <ll/api/coro/CoroTask.h>
 #include <ll/api/thread/ServerThreadExecutor.h>
 
-namespace translator::tasks {
+namespace placeholder::tasks {
 
 bool CacheCleanerTask::isStarted = false;
 
@@ -35,4 +35,4 @@ bool CacheCleanerTask::init() {
 
 bool CacheCleanerTask::isAlreadyStarted() { return isStarted; }
 
-} // namespace translator::tasks
+} // namespace placeholder::tasks

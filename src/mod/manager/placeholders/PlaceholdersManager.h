@@ -5,7 +5,7 @@
 
 class DataItem;
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 class PlaceholdersManager final {
 public:
@@ -62,4 +62,4 @@ private:
     );
 };
 
-} // namespace translator::manager
+} // namespace placeholder::manager

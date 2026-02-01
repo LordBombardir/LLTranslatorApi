@@ -3,7 +3,7 @@
 #include "placeholders/PlaceholdersManager.h"
 #include <ll/api/utils/HashUtils.h>
 
-namespace translator::manager {
+namespace placeholder::manager {
 
 static constexpr short timeRemained = 60;
 
@@ -152,4 +152,4 @@ std::string MainManager::generateKey(size_t length) {
     return result;
 }
 
-} // namespace translator::manager
+} // namespace placeholder::manager

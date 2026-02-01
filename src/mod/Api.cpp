@@ -3,7 +3,7 @@
 #include <ll/api/utils/HashUtils.h>
 #include <mc/platform/UUID.h>
 
-namespace translator::api {
+namespace placeholder::api {
 
 std::string hash(std::string_view string) {
     std::ostringstream oss;
@@ -52,4 +52,4 @@ std::unordered_map<std::string, std::string> getTemporaryPlaceholders(const std:
     return manager::MainManager::getTemporaryPlaceholders(localeCode);
 }
 
-} // namespace translator::api
+} // namespace placeholder::api

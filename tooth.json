@@ -1,10 +1,10 @@
 {
     "format_version": 3,
     "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
-    "tooth": "github.com/LordBombardir/LLTranslatorApi",
-    "version": "1.3.1",
+    "tooth": "github.com/LordBombardir/LLPlaceholderApi",
+    "version": "1.0.0",
     "info": {
-        "name": "TranslatorApi",
+        "name": "PlaceholderApi",
         "description": "This mod is intended for developers who want to support multilingualism.",
         "tags": [
             "platform:levilamina",
@@ -22,13 +22,13 @@
                 {
                     "type": "zip",
                     "urls": [
-                        "https://{{tooth}}/releases/download/v{{version}}/LLTranslatorApi-v{{version}}-server-release-windows-x64.zip"
+                        "https://{{tooth}}/releases/download/v{{version}}/LLPlaceholderApi-v{{version}}-server-release-windows-x64.zip"
                     ],
                     "placements": [
                         {
                             "type": "dir",
-                            "src": "TranslatorApi/",
-                            "dest": "plugins/TranslatorApi/"
+                            "src": "PlaceholderApi/",
+                            "dest": "plugins/PlaceholderApi/"
                         }
                     ]
                 }
@@ -56,13 +56,13 @@
                 {
                     "type": "zip",
                     "urls": [
-                        "https://{{tooth}}/releases/download/v{{version}}/LLTranslatorApi-v{{version}}-client-release-windows-x64.zip"
+                        "https://{{tooth}}/releases/download/v{{version}}/PlaceholderApi-v{{version}}-client-release-windows-x64.zip"
                     ],
                     "placements": [
                         {
                             "type": "dir",
-                            "src": "TranslatorApi/",
-                            "dest": "mods/TranslatorApi/"
+                            "src": "PlaceholderApi/",
+                            "dest": "mods/PlaceholderApi/"
                         }
                     ]
                 }
