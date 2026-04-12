@@ -41,7 +41,7 @@ jobs:
       - run: |
           xmake -v -y
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64
           path: |
@@ -102,7 +102,7 @@ jobs:
         run: |
           echo "| ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64.zip | ${{ steps.calculate-sha256.outputs.release }} |" > sha-row.txt
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: sha-row-${{ matrix.target_type }}-${{ matrix.mode }}
           path: sha-row.txt
