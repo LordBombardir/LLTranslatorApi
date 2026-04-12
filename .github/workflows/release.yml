@@ -81,7 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ${{ github.event.repository.name }}-${{ github.sha }}-${{ matrix.target_type }}-${{ matrix.mode }}-windows-x64
           path: artifact
@@ -121,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: sha-row-*
           path: rows
