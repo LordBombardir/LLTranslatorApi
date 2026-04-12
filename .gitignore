@@ -552,7 +552,7 @@ fabric.properties
 /.xmake/
 /build/
 /CMakeLists.txt
-
+/CMakeSettings.json
 
 # Project specific ignores
 /.idea/

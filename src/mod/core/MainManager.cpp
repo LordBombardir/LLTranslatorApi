@@ -24,6 +24,8 @@ bool MainManager::initModWhileLoading(ll::mod::NativeMod& mod) {
         return false;
     }
 
+    PlaceholdersManager::init();
+
     Hooks::setup();
     return true;
 }
