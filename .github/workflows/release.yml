@@ -57,7 +57,7 @@ jobs:
       - id: extract-release-notes
         uses: ffurrer2/extract-release-notes@v3
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.release.tag_name }}
           body: |
@@ -107,7 +107,7 @@ jobs:
           name: sha-row-${{ matrix.target_type }}-${{ matrix.mode }}
           path: sha-row.txt
       
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.release.tag_name }}
           files: |
@@ -138,7 +138,7 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           append_body: true
           tag_name: ${{ github.event.release.tag_name }}
