@@ -5,7 +5,7 @@
 #include "../utils/Utils.h"
 
 #include <ll/api/service/Bedrock.h>
-#include <mc/deps/certificates/WebToken.h>
+#include <mc/certificates/WebToken.h>
 #include <mc/network/ConnectionRequest.h>
 #include <mc/network/ServerNetworkHandler.h>
 #include <mc/world/actor/DataItem.h>
