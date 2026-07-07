@@ -2,7 +2,6 @@
 #include "../config/ConfigManager.h"
 #include "../config/types/Config.h"
 #include "../core/MainManager.h"
-#include "../utils/Utils.h"
 
 #include <ll/api/service/Bedrock.h>
 #include <mc/deps/certificates/WebToken.h>
@@ -51,39 +50,48 @@ PlaceholderProcessor::getAllPlaceholders(const NetworkIdentifier& id) const {
 
 void PlaceholderProcessor::replaceAllPlaceholders(
     std::string&                                        value,
-    const std::unordered_map<std::string, std::string>& placeholders,
-    const std::vector<size_t>&                          allOccurrences
+    const std::unordered_map<std::string, std::string>& placeholders
 ) const {
+    const std::string prefixScope = MainManager::getPrefixScope();
+    if (value.find(prefixScope) == std::string::npos) {
+        return;
+    }
+
     constexpr size_t prefixScopeLength = 16;
     constexpr size_t separatorLength   = 1;
     constexpr size_t keyLength         = 16;
+    constexpr size_t totalKeyLength    = prefixScopeLength + separatorLength + keyLength;
 
-    constexpr size_t totalKeyLength = prefixScopeLength + separatorLength + keyLength;
+    constexpr int maxDepth = 5;
+    for (int depth = 0; depth < maxDepth; ++depth) {
+        std::string result;
+        result.reserve(value.size());
 
-    bool replacedSomething = false;
-    for (size_t pos : allOccurrences) {
-        if (pos + totalKeyLength > value.size()) {
-            continue;
+        bool   replacedSomething = false;
+        size_t i                 = 0;
+        while (i < value.size()) {
+            if (i + totalKeyLength <= value.size() && value.compare(i, prefixScope.size(), prefixScope) == 0) {
+                std::string placeholder = value.substr(i, totalKeyLength);
+                auto        it          = placeholders.find(placeholder);
+                if (it != placeholders.end()) {
+                    result.append(it->second);
+                    i += totalKeyLength;
+
+                    replacedSomething = true;
+                    continue;
+                }
+            }
+            result.push_back(value[i]);
+            i++;
         }
 
-        std::string_view placeholder(value.data() + pos, totalKeyLength);
-
-        auto it = placeholders.find(std::string(placeholder));
-        if (it == placeholders.end()) {
-            continue;
+        if (!replacedSomething) {
+            break;
         }
 
-        std::string newValue = Utils::strReplace(value, placeholder, it->second);
-        if (newValue != value) {
-            value             = std::move(newValue);
-            replacedSomething = true;
-        }
-    }
-
-    if (replacedSomething) {
-        const auto& newOccurrences = Utils::findAllOccurrences(value, MainManager::getPrefixScope());
-        if (!newOccurrences.empty()) {
-            replaceAllPlaceholders(value, placeholders, newOccurrences);
+        value = std::move(result);
+        if (value.find(prefixScope) == std::string::npos) {
+            break;
         }
     }
 }

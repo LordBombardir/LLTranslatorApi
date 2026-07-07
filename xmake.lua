@@ -3,9 +3,9 @@ add_rules("mode.debug", "mode.release")
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
 if is_config("target_type", "server") then
-    add_requires("levilamina 26.10.6", {configs = {target_type = "server"}})
+    add_requires("levilamina 26.20.0", {configs = {target_type = "server"}})
 else
-    add_requires("levilamina 26.10.6", {configs = {target_type = "client"}})
+    add_requires("levilamina 26.20.0", {configs = {target_type = "client"}})
 end
 
 add_requires("levibuildscript")
@@ -30,7 +30,14 @@ target("PlaceholderApi") -- Change this to your mod name.
     add_packages("levilamina")
     set_exceptions("none") -- To avoid conflicts with /EHa.
     set_kind("shared")
+    
     set_languages("c++20")
+    if is_windows then
+        add_defines("_HAS_CXX23=1")
+    else
+        add_defines("_LIBCPP_STD_VER=23")
+        add_cxxflags("clang::-stdlib=libc++")
+    end
 
     set_symbols("debug")
     add_files("src/**.cpp")

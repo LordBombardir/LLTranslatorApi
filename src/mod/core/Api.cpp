@@ -3,14 +3,12 @@
 
 #include <ll/api/utils/HashUtils.h>
 #include <mc/platform/UUID.h>
+#include <format>
 
 namespace placeholder::api {
 
 std::string hash(std::string_view string) {
-    std::ostringstream oss;
-
-    oss << std::hex << std::setw(16) << std::setfill('0') << ll::hash_utils::doHash(string);
-    return oss.str();
+    return std::format("{:016x}", ll::hash_utils::doHash(string));
 }
 
 std::string generatePlaceholder(std::string_view placeholder) {

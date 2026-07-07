@@ -3,25 +3,28 @@
 
 #include <mc/network/packet/AvailableCommandsPacket.h>
 
-AvailableCommandsPacket::ParamData::ParamData(const AvailableCommandsPacket::ParamData&) = default;
-
-AvailableCommandsPacket::CommandData::CommandData(const CommandData&) = default;
-
 namespace placeholder {
 
-// Without cache (const_cast)
 const Packet& AvailableCommandsProcessor::process(const NetworkIdentifier& id, const Packet& packet) const {
-    AvailableCommandsPacket& castedPacket =
-        const_cast<AvailableCommandsPacket&>(static_cast<const AvailableCommandsPacket&>(packet));
+    const AvailableCommandsPacket& castedPacket = static_cast<const AvailableCommandsPacket&>(packet);
 
-    for (AvailableCommandsPacket::CommandData& command : *castedPacket.mCommands) {
+    AvailableCommandsPacket* newPacket = new AvailableCommandsPacket(castedPacket);
+
+    bool replacedSomething = false;
+    for (AvailableCommandsPacketPayload::CommandData& command : *newPacket->mCommands) {
         const auto& placeholder = MainManager::getPlaceholder(command.name, getPlayerLocaleCode(id));
         if (placeholder.has_value()) {
             command.description = *placeholder;
+            replacedSomething = true;
         }
     }
 
-    return castedPacket;
+    if (!replacedSomething) {
+        delete newPacket;
+        return packet;
+    }
+
+    return *newPacket;
 }
 
 } // namespace placeholder

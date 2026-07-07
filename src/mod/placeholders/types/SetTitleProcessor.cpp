@@ -1,7 +1,5 @@
 #include "SetTitleProcessor.h"
 #include "../../core/MainManager.h"
-#include "../../utils/Utils.h"
-#include "../PlaceholdersManager.h"
 
 #include <mc/network/packet/SetTitlePacket.h>
 
@@ -13,15 +11,13 @@ namespace placeholder {
 const Packet& SetTitleProcessor::process(const NetworkIdentifier& id, const Packet& packet) const {
     const SetTitlePacket& castedPacket = static_cast<const SetTitlePacket&>(packet);
 
-    const auto& allOccurrences = Utils::findAllOccurrences(*castedPacket.mTitleText, MainManager::getPrefixScope());
-    if (allOccurrences.empty()) {
+    if (castedPacket.mTitleText->find(MainManager::getPrefixScope()) == std::string::npos) {
         return packet;
     }
 
     SetTitlePacket* newPacket = new SetTitlePacket(castedPacket);
-    replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id), allOccurrences);
+    replaceAllPlaceholders(*newPacket->mTitleText, getAllPlaceholders(id));
 
-    PlaceholdersManager::addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
 }
 

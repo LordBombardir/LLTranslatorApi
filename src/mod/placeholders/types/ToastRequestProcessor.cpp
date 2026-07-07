@@ -1,7 +1,5 @@
-#include "../../core/MainManager.h"
-#include "../../utils/Utils.h"
-#include "../PlaceholdersManager.h"
 #include "ToastRequestProcessor.h"
+#include "../../core/MainManager.h"
 
 #include <mc/network/packet/ToastRequestPacket.h>
 
@@ -13,19 +11,17 @@ namespace placeholder {
 const Packet& ToastRequestProcessor::process(const NetworkIdentifier& id, const Packet& packet) const {
     const ToastRequestPacket& castedPacket = static_cast<const ToastRequestPacket&>(packet);
 
-    const auto& firstAllOccurrences  = Utils::findAllOccurrences(*castedPacket.mTitle, MainManager::getPrefixScope());
-    const auto& secondAllOccurrences = Utils::findAllOccurrences(*castedPacket.mContent, MainManager::getPrefixScope());
-
-    if (firstAllOccurrences.empty() && secondAllOccurrences.empty()) {
+    const std::string prefixScope = MainManager::getPrefixScope();
+    if (castedPacket.mTitle->find(prefixScope) == std::string::npos
+        && castedPacket.mContent->find(prefixScope) == std::string::npos) {
         return packet;
     }
 
     ToastRequestPacket* newPacket = new ToastRequestPacket(castedPacket);
 
-    replaceAllPlaceholders(*newPacket->mTitle, getAllPlaceholders(id), firstAllOccurrences);
-    replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id), secondAllOccurrences);
+    replaceAllPlaceholders(*newPacket->mTitle, getAllPlaceholders(id));
+    replaceAllPlaceholders(*newPacket->mContent, getAllPlaceholders(id));
 
-    PlaceholdersManager::addCachedPacket(&packet, newPacket, getPlayerLocaleCode(id));
     return *newPacket;
 }
 

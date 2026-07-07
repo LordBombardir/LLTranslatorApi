@@ -28,6 +28,7 @@ LL_TYPE_INSTANCE_HOOK(
     const std::vector<NetworkIdentifierWithSubId>& ids,
     const Packet&                                  packet
 ) {
+    PlaceholdersManager::SendScopeGuard guard;
     for (const NetworkIdentifierWithSubId& id : ids) {
         thisFor<NetworkSystem>()->send(id.id, packet, id.subClientId);
     }
@@ -43,6 +44,7 @@ LL_TYPE_INSTANCE_HOOK(
     const Packet&            originalPacket,
     SubClientId              recipientSubId
 ) {
+    PlaceholdersManager::SendScopeGuard guard;
     return origin(id, PlaceholdersManager::processPacket(id, originalPacket), recipientSubId);
 }
 

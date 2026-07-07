@@ -3,7 +3,6 @@
 #include "../config/types/Config.h"
 #include "../hooks/Hooks.h"
 #include "../placeholders/PlaceholdersManager.h"
-#include "../tasks/CacheCleanerTask.h"
 
 #include <ll/api/utils/HashUtils.h>
 
@@ -17,6 +16,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, MainManager::Tem
     MainManager::temporaryPlaceholders = {};
 
 std::recursive_mutex MainManager::temporaryPlaceholdersMutex;
+std::recursive_mutex MainManager::placeholdersMutex;
 
 bool MainManager::initModWhileLoading(ll::mod::NativeMod& mod) {
     if (!ConfigManager::init(mod)) {
@@ -30,18 +30,9 @@ bool MainManager::initModWhileLoading(ll::mod::NativeMod& mod) {
     return true;
 }
 
-bool MainManager::initModWhileEnabling([[maybe_unused]] ll::mod::NativeMod& mod) {
-    if (!CacheCleanerTask::enable()) {
-        mod.getLogger().error("Failed to init CacheCleanerTask!");
-        return false;
-    }
-
-    return true;
-}
+bool MainManager::initModWhileEnabling([[maybe_unused]] ll::mod::NativeMod& mod) { return true; }
 
 void MainManager::disableMod() {
-    CacheCleanerTask::disable();
-
     PlaceholdersManager::cleanPackets(true);
     cleanTemporaryPlaceholders(true);
 }
@@ -68,11 +59,13 @@ void MainManager::setPlaceholder(
     const std::string& replaceFor,
     const std::string& localeCode
 ) {
+    std::lock_guard<std::recursive_mutex> lock(placeholdersMutex);
     placeholders[localeCode][placeholder] = replaceFor;
 }
 
 std::optional<std::string> MainManager::getPlaceholder(const std::string& placeholder, const std::string& localeCode) {
-    auto firstIt = placeholders.find(localeCode);
+    std::lock_guard<std::recursive_mutex> lock(placeholdersMutex);
+    auto                                  firstIt = placeholders.find(localeCode);
     if (firstIt == placeholders.end()) {
         if (localeCode == ConfigManager::getConfig().defaultLocaleCode) {
             return std::nullopt;
@@ -90,7 +83,8 @@ std::optional<std::string> MainManager::getPlaceholder(const std::string& placeh
 }
 
 void MainManager::removePlaceholder(const std::string& placeholder, const std::string& localeCode) {
-    auto firstIt = placeholders.find(localeCode);
+    std::lock_guard<std::recursive_mutex> lock(placeholdersMutex);
+    auto                                  firstIt = placeholders.find(localeCode);
     if (firstIt == placeholders.end()) {
         return;
     }
@@ -104,6 +98,7 @@ void MainManager::removePlaceholder(const std::string& placeholder, const std::s
 }
 
 std::unordered_map<std::string, std::string> MainManager::getPlaceholders(const std::string& localeCode) {
+    std::lock_guard<std::recursive_mutex> lock(placeholdersMutex);
     return mergeLocaleMaps(
         placeholders,
         ConfigManager::getConfig().defaultLocaleCode,

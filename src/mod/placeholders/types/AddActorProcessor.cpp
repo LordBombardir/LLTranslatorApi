@@ -1,6 +1,5 @@
 #include "AddActorProcessor.h"
 #include "../../core/MainManager.h"
-#include "../../utils/Utils.h"
 #include "../PlaceholdersManager.h"
 
 #include <mc/network/packet/AddActorPacket.h>
@@ -15,7 +14,6 @@ PropertySyncData::PropertySyncData()                                   = default
 
 namespace placeholder {
 
-// Without cache
 const Packet& AddActorProcessor::process(const NetworkIdentifier& id, const Packet& packet) const {
     const AddActorPacket& castedPacket = static_cast<const AddActorPacket&>(packet);
 
@@ -36,6 +34,7 @@ const Packet& AddActorProcessor::process(const NetworkIdentifier& id, const Pack
     newPacket->mMap               = castedPacket.mMap;
     newPacket->mEntityData        = castedPacket.mEntityData;
 
+    const std::string prefixScope = MainManager::getPrefixScope();
     bool replacedSomething = false;
     for (auto& dataItem : *newPacket->mData) {
         DataItemType type = dataItem->getType();
@@ -44,13 +43,11 @@ const Packet& AddActorProcessor::process(const NetworkIdentifier& id, const Pack
         }
 
         std::string data = dataItem->getData<std::string>();
-
-        const auto& allOccurrences = Utils::findAllOccurrences(data, MainManager::getPrefixScope());
-        if (allOccurrences.empty()) {
+        if (data.find(prefixScope) == std::string::npos) {
             continue;
         }
 
-        replaceAllPlaceholders(data, getAllPlaceholders(id), allOccurrences);
+        replaceAllPlaceholders(data, getAllPlaceholders(id));
         replaceDataItemStringValue(*newPacket->mData, dataItem->getId(), data);
 
         replacedSomething = true;
@@ -61,7 +58,6 @@ const Packet& AddActorProcessor::process(const NetworkIdentifier& id, const Pack
         return packet;
     }
 
-    PlaceholdersManager::addTemporaryPacket(newPacket);
     return *newPacket;
 }
 

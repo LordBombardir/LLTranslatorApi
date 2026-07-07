@@ -1,6 +1,10 @@
 #pragma once
 
 #include <mc/network/Packet.h>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 class DataItem;
 
@@ -13,20 +17,22 @@ public:
     virtual MinecraftPacketIds getPacketId() const = 0;
 
     virtual const Packet& process(const NetworkIdentifier& id, const Packet& packet) const = 0;
-    
+
     static std::string getPlayerLocaleCode(const NetworkIdentifier& id);
 
 protected:
     std::unordered_map<std::string, std::string> getAllPlaceholders(const NetworkIdentifier& id) const;
 
-    void replaceAllPlaceholders(
-        std::string&                                        value,
-        const std::unordered_map<std::string, std::string>& placeholders,
-        const std::vector<size_t>&                          allOccurrences
-    ) const;
+    void
+    replaceAllPlaceholders(std::string& value, const std::unordered_map<std::string, std::string>& placeholders) const;
 
     std::vector<std::unique_ptr<DataItem>> cloneDataItems(const std::vector<std::unique_ptr<DataItem>>& source) const;
-    void replaceDataItemStringValue(std::vector<std::unique_ptr<DataItem>>& mData, ushort id, const std::string& value) const;
+
+    void replaceDataItemStringValue(
+        std::vector<std::unique_ptr<DataItem>>& mData,
+        ushort                                  id,
+        const std::string&                      value
+    ) const;
 };
 
 } // namespace placeholder

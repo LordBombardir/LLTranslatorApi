@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ll/api/mod/NativeMod.h>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -39,6 +40,7 @@ public:
 
 private:
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> placeholders;
+    static std::recursive_mutex                                                          placeholdersMutex;
 
     struct TemporaryPlaceholder {
         short       secondsToCleanRemain;

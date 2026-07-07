@@ -8,15 +8,14 @@
 #include "types/TextProcessor.h"
 #include "types/ToastRequestProcessor.h"
 
+#include <ranges>
+
 namespace placeholder {
 
-static constexpr short timeRemained = 60;
+thread_local int sendNestingDepth = 0;
 
 std::unordered_map<const Packet*, PlaceholdersManager::CachedPacket> PlaceholdersManager::cachedPackets = {};
 std::mutex                                                           PlaceholdersManager::cachedPacketsMutex;
-
-std::vector<PlaceholdersManager::TemporaryPacket> PlaceholdersManager::temporaryPackets = {};
-std::mutex                                        PlaceholdersManager::temporaryPacketsMutex;
 
 std::unordered_map<MinecraftPacketIds, std::unique_ptr<PlaceholderProcessor>>
     PlaceholdersManager::placeholderProcessors = {};
@@ -33,40 +32,25 @@ void PlaceholdersManager::init() {
 }
 
 void PlaceholdersManager::cleanPackets(bool forced) {
-    cleanCachedPackets(forced);
-    cleanTemporaryPackets(forced);
-}
-
-void PlaceholdersManager::cleanCachedPackets(bool forced) {
-    std::lock_guard<std::mutex> lock(cachedPacketsMutex);
-
-    for (auto it = cachedPackets.begin(); it != cachedPackets.end();) {
-        if (--it->second.secondsToCleanRemain <= 0 || forced) {
-            for (const Packet* packet : it->second.packets | std::views::values) {
+    if (forced) {
+        std::lock_guard<std::mutex> lock(cachedPacketsMutex);
+        for (const auto& cached : cachedPackets | std::views::values) {
+            for (const Packet* packet : cached.packets | std::views::values) {
                 delete packet;
             }
-
-            it->second.packets.clear();
-            it = cachedPackets.erase(it);
         }
-    }
-}
-
-void PlaceholdersManager::cleanTemporaryPackets(bool forced) {
-    std::lock_guard<std::mutex> lock(temporaryPacketsMutex);
-
-    for (auto it = temporaryPackets.begin(); it != temporaryPackets.end();) {
-        if (--it->secondsToCleanRemain <= 0 || forced) {
-            delete it->packet;
-            it = temporaryPackets.erase(it);
-        }
+        cachedPackets.clear();
     }
 }
 
 const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, const Packet& packet) {
-    auto cachedPacket = getCachedPacket(&packet, PlaceholderProcessor::getPlayerLocaleCode(id));
-    if (cachedPacket != nullptr) {
-        return *cachedPacket;
+    const std::string localeCode = PlaceholderProcessor::getPlayerLocaleCode(id);
+
+    if (isInsideSendToMultiple()) {
+        auto cachedPacket = getCachedPacket(&packet, localeCode);
+        if (cachedPacket != nullptr) {
+            return *cachedPacket;
+        }
     }
 
     auto processor = placeholderProcessors.find(packet.getId());
@@ -74,12 +58,11 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
         return packet;
     }
 
-    return processor->second->process(id, packet);
-}
-
-void PlaceholdersManager::addTemporaryPacket(const Packet* packet) {
-    std::lock_guard<std::mutex> lock(temporaryPacketsMutex);
-    temporaryPackets.emplace_back(timeRemained, packet);
+    const Packet& processed = processor->second->process(id, packet);
+    if (&processed != &packet) {
+        addCachedPacket(&packet, &processed, localeCode);
+    }
+    return processed;
 }
 
 void PlaceholdersManager::addCachedPacket(
@@ -88,18 +71,7 @@ void PlaceholdersManager::addCachedPacket(
     const std::string& localeCode
 ) {
     std::lock_guard<std::mutex> lock(cachedPacketsMutex);
-
-    PlaceholdersManager::CachedPacket cachedPacket;
-
-    auto it = cachedPackets.find(originalPacket);
-    if (it != cachedPackets.end()) {
-        cachedPacket = std::move(it->second);
-    }
-
-    cachedPacket.secondsToCleanRemain = timeRemained;
-    cachedPacket.packets[localeCode]  = packet;
-
-    cachedPackets[originalPacket] = cachedPacket;
+    cachedPackets[originalPacket].packets[localeCode] = packet;
 }
 
 const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket, const std::string& localeCode) {
@@ -110,18 +82,24 @@ const Packet* PlaceholdersManager::getCachedPacket(const Packet* originalPacket,
         return nullptr;
     }
 
-    auto& cachedPacket                = firstIt->second;
-    cachedPacket.secondsToCleanRemain = timeRemained;
-
-    const auto& packets = cachedPacket.packets;
-
-    auto secondIt = packets.find(localeCode);
+    const auto& packets  = firstIt->second.packets;
+    auto        secondIt = packets.find(localeCode);
     if (secondIt == packets.end()) {
         return nullptr;
     }
 
     return secondIt->second;
 }
+
+void PlaceholdersManager::startSendScope() { sendNestingDepth++; }
+
+void PlaceholdersManager::endSendScope() {
+    if (--sendNestingDepth == 0) {
+        cleanPackets(true);
+    }
+}
+
+bool PlaceholdersManager::isInsideSendToMultiple() { return sendNestingDepth > 1; }
 
 void PlaceholdersManager::registerProcessor(std::unique_ptr<PlaceholderProcessor> processor) {
     auto packetId = processor->getPacketId();
