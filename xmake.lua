@@ -24,13 +24,28 @@ target("PlaceholderApi") -- Change this to your mod name.
     add_rules("@levibuildscript/linkrule")
     add_rules("@levibuildscript/modpacker")
 
-    add_cxflags("/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
-    add_defines("NOMINMAX", "UNICODE", "_HAS_CXX23=1", "PLACEHOLDERAPI_EXPORT")
+    if is_plat("windows") then
+        add_defines("NOMINMAX", "UNICODE")
+        set_exceptions("none") -- To avoid conflicts with /EHa.
+        add_cxflags( "/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
+        add_cxflags(
+            "/EHs",
+            "-Wno-microsoft-cast",
+            "-Wno-invalid-offsetof",
+            "-Wno-c++2b-extensions",
+            "-Wno-microsoft-include",
+            "-Wno-overloaded-virtual",
+            "-Wno-ignored-qualifiers",
+            "-Wno-missing-field-initializers",
+            "-Wno-potentially-evaluated-expression",
+            "-Wno-pragma-system-header-outside-header",
+            {tools = {"clang_cl"}}
+        )
+        set_toolchains("clang-cl")
+    end
 
     add_packages("levilamina")
-    set_exceptions("none") -- To avoid conflicts with /EHa.
-    set_kind("shared")
-    
+
     set_languages("c++20")
     if is_windows then
         add_defines("_HAS_CXX23=1")
@@ -39,7 +54,10 @@ target("PlaceholderApi") -- Change this to your mod name.
         add_cxxflags("clang::-stdlib=libc++")
     end
 
+    add_defines("PLACEHOLDERAPI_EXPORT")
     set_symbols("debug")
+    set_kind("shared")
+
     add_files("src/**.cpp")
     add_includedirs("src")
 
