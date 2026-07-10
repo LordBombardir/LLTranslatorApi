@@ -5,22 +5,18 @@
 
 #include <ll/api/service/Bedrock.h>
 #include <mc/deps/certificates/WebToken.h>
+#include <mc/locale/I18n.h>
+#include <mc/locale/Localization.h>
 #include <mc/network/ConnectionRequest.h>
 #include <mc/network/ServerNetworkHandler.h>
 #include <mc/world/actor/DataItem.h>
 
 namespace placeholder {
 
-std::string PlaceholderProcessor::getPlayerLocaleCode(const NetworkIdentifier& id) {
-#ifdef LL_PLAT_C
-    static bool isClientSide = true;
-#else
-    static bool isClientSide = false;
-#endif
-
-    auto serverNetworkHandler = ll::service::getServerNetworkHandler(isClientSide);
+std::string PlaceholderProcessor::getPlayerLocaleCode([[maybe_unused]] const NetworkIdentifier& id) {
+    auto serverNetworkHandler = ll::service::getServerNetworkHandler();
     if (!serverNetworkHandler) {
-        return ConfigManager::getConfig().defaultLocaleCode;
+        return getI18n().getCurrentLanguage()->mCode.get();
     }
 
     auto& clients = *serverNetworkHandler->mClients;

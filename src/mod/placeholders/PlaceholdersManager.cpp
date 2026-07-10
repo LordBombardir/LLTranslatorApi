@@ -39,6 +39,7 @@ void PlaceholdersManager::cleanPackets(bool forced) {
                 delete packet;
             }
         }
+
         cachedPackets.clear();
     }
 }
@@ -62,6 +63,7 @@ const Packet& PlaceholdersManager::processPacket(const NetworkIdentifier& id, co
     if (&processed != &packet) {
         addCachedPacket(&packet, &processed, localeCode);
     }
+
     return processed;
 }
 

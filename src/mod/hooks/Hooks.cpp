@@ -1,6 +1,4 @@
 #include "Hooks.h"
-#include "../config/ConfigManager.h"
-#include "../config/types/Config.h"
 #include "../placeholders/PlaceholdersManager.h"
 
 #include <ll/api/i18n/I18n.h>
@@ -9,15 +7,6 @@
 #include <mc/network/NetworkSystem.h>
 
 namespace placeholder {
-
-LL_STATIC_HOOK(
-    LeviLaminaDefaultLocaleCodeHook,
-    HookPriority::Normal,
-    &ll::i18n::getDefaultLocaleCode,
-    std::string_view
-) {
-    return ConfigManager::getConfig().defaultLocaleCode;
-}
 
 LL_TYPE_INSTANCE_HOOK(
     NetworkSystemSendToMultipleHook,
@@ -49,10 +38,6 @@ LL_TYPE_INSTANCE_HOOK(
 }
 
 void Hooks::setup() {
-    if (ConfigManager::getConfig().replaceLeviLaminaDefaultLocaleCode) {
-        LeviLaminaDefaultLocaleCodeHook::hook();
-    }
-
     NetworkSystemSendToMultipleHook::hook();
     NetworkSystemSendHook::hook();
 }
